@@ -42,7 +42,8 @@ class DBProvider {
         "note TEXT,"
         "checker INTEGER,"
         "number INTEGER,"
-        "tag TEXT"
+        "tag TEXT,"
+        "model INTEGER"
         ")");
   }
 

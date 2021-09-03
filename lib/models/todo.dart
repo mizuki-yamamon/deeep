@@ -9,6 +9,7 @@ class Todo {
   int? checker;
   int? number;
   String? tag;
+  int? model;
 
   Todo({
     this.id,
@@ -18,6 +19,7 @@ class Todo {
     @required this.checker,
     @required this.number,
     @required this.tag,
+    @required this.model,
   });
   Todo.newTodo() {
     title = "";
@@ -26,6 +28,7 @@ class Todo {
     checker = 0;
     number = 0;
     tag = '';
+    model = 0;
   }
 
   // assignUUID() {
@@ -42,6 +45,7 @@ class Todo {
         checker: json["checker"],
         number: json["number"],
         tag: json["tag"],
+        model: json["model"],
       );
 
   Map<String, dynamic> toMap() => {
@@ -53,6 +57,7 @@ class Todo {
         "checker": checker,
         "number": number,
         "tag": tag,
+        "model": model,
         // "check": check!.toUtc().toIso8601String(),
       };
 }

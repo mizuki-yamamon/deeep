@@ -53,25 +53,39 @@ class GridTiles extends StatelessWidget {
           print(todo.number);
           print(todo.tag);
 
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (_) => LayerView(
-          //       todo: todo, layer: 1, // bloc: _bloc,
-          //       //問題をtitleかtagsで分けるため
-          //     ),
-          //   ),
-          // );
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MandalaGridScreen(
-                todo: todo, layer: 1, bloc: _bloc,
-                //問題をtitleかtagsで分けるため
+          if (todo.title!.isEmpty) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TodoEditView(
+                          number: todo.number,
+                          //todoList: todos,
+                          todoBloc: _bloc,
+                          todo: todo,
+                          label: todo.tag,
+                        )));
+          } else if (todo.model == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => LayerView(
+                  todo: todo, layer: 1, // bloc: _bloc,
+                  //問題をtitleかtagsで分けるため
+                ),
               ),
-            ),
-          );
+            );
+          } else if (todo.model == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MandalaGridScreen(
+                  todo: todo, layer: 1, bloc: _bloc,
+                  //問題をtitleかtagsで分けるため
+                ),
+              ),
+            );
+          }
+
           // }
         },
         onTap: () {

@@ -1,4 +1,5 @@
 import 'package:deep/components/todo_edit/todo_edit_view.dart';
+import 'package:deep/components/todo_list/layer_view.dart';
 import 'package:deep/components/todo_list/mandala_grid.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/repositories/todo_bloc.dart';
@@ -51,18 +52,42 @@ class MandaraTiles extends StatelessWidget {
           //     // );
           //   }
           // } else {
-          if (index == 4) {
+          if (todo.title!.isEmpty) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TodoEditView(
+                          number: todo.number,
+                          //todoList: todos,
+                          todoBloc: _bloc,
+                          todo: todo,
+                          label: todo.tag,
+                        )));
+          } else if (index == 4) {
             Navigator.pop(context);
           } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MandalaGridScreen(
-                  todo: todo, layer: 1, bloc: _bloc,
-                  //問題をtitleかtagsで分けるため
+            if (todo.model == 0) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LayerView(
+                    todo: todo, layer: 1, // bloc: _bloc,
+                    //問題をtitleかtagsで分けるため
+                  ),
                 ),
-              ),
-            );
+              );
+            } else if (todo.model == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MandalaGridScreen(
+                    todo: todo, layer: 1, bloc: _bloc,
+                    //問題をtitleかtagsで分けるため
+                  ),
+                ),
+              );
+            }
+            //
           }
 
           // }

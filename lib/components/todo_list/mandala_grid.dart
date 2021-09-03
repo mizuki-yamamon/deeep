@@ -52,12 +52,6 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     StaggeredTileExtended.count(1, 1),
   ];
 
-  List<int> _numbers = [0, 1, 2, 3, 4, 5, 6, 7];
-
-  // List<Widget> _tiles = <Widget>[
-  //   _Trashcan(Key("trash"), Icon(Icons.delete, color: Colors.white)),
-  // ];
-
   @override
   void initState() {
     // TODO: implement initState
@@ -73,6 +67,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     super.dispose();
   }
 
+//マンダラグリットがない時に生成
   _createTodo() async {
     print('object');
     List<Todo> thelist = await DBProvider.db.getAllTodos();
@@ -98,37 +93,10 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
             dueDate: DateTime.now(),
             checker: 0,
             number: i,
-            tag: widget.todo.tag! + widget.todo.id!),
+            tag: widget.todo.tag! + widget.todo.id!,
+            model: 1),
       );
     }
-    // List<Todo> thelist = _allList
-    //     .where((element) => (widget.todo.tag! + widget.todo.id!) == element.tag)
-    //     .toList();
-    // if (_allList
-    //         .where((element) =>
-    //             (widget.todo.tag! + widget.todo.id!) == element.tag)
-    //         .toList()
-    //         .length <=
-    //     7) {
-    //   for (int i = _allList
-    //           .where((element) =>
-    //               (widget.todo.tag! + widget.todo.id!) == element.tag)
-    //           .toList()
-    //           .length;
-    //       i < 8;
-    //       i++) {
-    //     widget.bloc.create(
-    //       Todo(
-    //           id: Uuid().v4(),
-    //           title: '',
-    //           note: '',
-    //           dueDate: DateTime.now(),
-    //           checker: 0,
-    //           number: i,
-    //           tag: widget.todo.tag! + widget.todo.id!),
-    //     );
-    //   }
-    // }
   }
 
   _content(List<Todo> _todoList, List<Todo> _allTodos) {
@@ -175,49 +143,6 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                   .where((element) => element.id == widget.todo.id)
                   .first;
 
-              // _todoList.insert(4, _centerTodo);
-
-              // for (int i = 0; i <= snapshot.data!.length; i++) {
-              //   _listStaggeredTileExtended
-              //       .add(StaggeredTileExtended.count(1, 1));
-              // }
-
-              // List<Todo> thelist = snapshot.data!
-              //     .where((element) =>
-              //         (widget.todo.tag! + widget.todo.id!) == element.tag)
-              //     .toList();
-
-              // for (int i = snapshot.data!
-              //         .where((element) =>
-              //             element.tag == widget.todo.tag! + widget.todo.id!)
-              //         .toList()
-              //         .length;
-              //     i <= 7;
-              //     i++) {
-              //   widget.bloc.create(
-              //     Todo(
-              //         id: Uuid().v4(),
-              //         title: '',
-              //         note: '',
-              //         dueDate: DateTime.now(),
-              //         checker: 0,
-              //         number: i,
-              //         tag: widget.todo.tag! + widget.todo.id!),
-              //   );
-              // }
-
-              // while (_todoList.length <= 8) {
-              //   widget.bloc.create(
-              //     Todo(
-              //         id: Uuid().v4(),
-              //         title: '',
-              //         note: '',
-              //         dueDate: DateTime.now(),
-              //         checker: 0,
-              //         number: _todoList.length,
-              //         tag: widget.todo.tag! + widget.todo.id!),
-              //   );
-              // }
               if (_todoList.length > 4) {
                 _todoList.sort((a, b) => a.number!.compareTo(b.number!));
                 _todoList.insert(4, _centerTodo);
