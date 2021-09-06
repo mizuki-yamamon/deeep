@@ -123,8 +123,21 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     final _bloc = Provider.of<TodoBloc>(context, listen: false);
 
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text(widget.layer.toString() + '層目'),
+        backgroundColor: Colors.grey[100],
+        centerTitle: true,
+        title: Text(
+          widget.layer.toString() + '層目',
+          style: TextStyle(color: Colors.black),
+        ),
+        elevation: 0.0,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.popUntil(
+                  context, (Route<dynamic> route) => route.isFirst);
+            },
+            icon: Icon(Icons.fast_rewind, color: Colors.black)),
         // Here we take the value from the LayerGridScreen object that was created by
         // the App.build method, and use it to set our appbar title.
         //title: Text('Map'),
@@ -149,7 +162,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                 return Container(
                   width: width,
                   height: height,
-                  color: Colors.blue[200],
+                  color: Colors.grey[100],
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [

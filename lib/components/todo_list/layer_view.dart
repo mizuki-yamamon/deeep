@@ -42,7 +42,13 @@ class _LayerViewState extends State<LayerView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(ConstText.todoListView),
+        //title: Text(ConstText.todoListView),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.popUntil(
+                  context, (Route<dynamic> route) => route.isFirst);
+            },
+            icon: Icon(Icons.fast_rewind)),
       ),
       body: StreamBuilder<List<Todo>>(
         stream: _bloc.todoStream,
@@ -72,31 +78,53 @@ class _LayerViewState extends State<LayerView> {
                     width: width * 0.3,
                     height: width * 0.3,
                     child: Card(
-                      color: Colors.orange[200],
+                      color: Colors.white,
                       child: new InkWell(
                         onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => TodoEditView(
-                                        number: _centerTodo.number,
-                                        //todoList: _todoList,
-                                        todoBloc: _bloc,
-                                        todo: _centerTodo,
-                                        label: _centerTodo.tag,
-                                      )));
+                          // Navigator.push(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => TodoEditView(
+                          //               number: _centerTodo.number,
+                          //               //todoList: _todoList,
+                          //               todoBloc: _bloc,
+                          //               todo: _centerTodo,
+                          //               label: _centerTodo.tag,
+                          //             )));
+                          showModalBottomSheet(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(20.0),
+                                      topLeft: Radius.circular(20.0))),
+                              backgroundColor: Colors.white,
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) {
+                                return TodoEditView(
+                                  number: _centerTodo.number,
+                                  //todoList: _todoList,
+                                  todoBloc: _bloc,
+                                  todo: _centerTodo,
+                                  label: _centerTodo.tag,
+                                );
+                              });
                         },
                         onDoubleTap: () {
                           Navigator.pop(context);
                         },
                         child: new Center(
-                          child: Text(
-                            _centerTodo.title!,
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
+                            child: Hero(
+                          tag: 'tag' + widget.todo.id!,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Text(
+                              _centerTodo.title!,
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
+                            ),
                           ),
-                        ),
+                        )),
                       ),
                     ),
                   ),
@@ -172,7 +200,6 @@ class _LayerViewState extends State<LayerView> {
             Key(_todoList[index].id!),
             _todoList[index],
             _allTodos,
-            index,
           ),
         )
         // _Example01Tile(Key(_tags[index].id!), _tags[index],

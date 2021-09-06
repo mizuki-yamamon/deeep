@@ -1,8 +1,7 @@
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:deep/configs/const_text.dart';
 import 'package:deep/models/todo.dart';
-import 'package:deep/repositories/db_provider.dart';
 import 'package:deep/repositories/todo_bloc.dart';
+import 'package:deep/widgets/link_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -42,6 +41,7 @@ class _TodoEditViewState extends State<TodoEditView> {
   final DateFormat _format = DateFormat("yyyy-MM-dd HH:mm");
 
   Todo? _newTodo;
+  bool _isCommenting = false;
 //  int _type = 0;
   @override
   void initState() {
@@ -74,29 +74,113 @@ class _TodoEditViewState extends State<TodoEditView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text(ConstText.todoEditView)),
-        body: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: Container(
-            padding: const EdgeInsets.all(30.0),
-            child: SingleChildScrollView(
+    return
+        //  Scaffold(
+        //     appBar: AppBar(
+        //       backgroundColor: Colors.white,
+        //       leading: IconButton(
+        //         onPressed: () => Navigator.pop(context),
+        //         icon: Icon(
+        //           Icons.expand_more,
+        //           color: Colors.black,
+        //         ),
+        //       ),
+        //       title: Text(
+        //         '編集',
+        //         style: TextStyle(color: Colors.black),
+        //       ),
+        //       elevation: 0.0,
+        //     ),
+        //     body:
+        GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+              setState(() {
+                _isCommenting = !_isCommenting;
+              });
+            },
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.9,
+              padding: const EdgeInsets.all(8.0),
               child: Column(
-                children: <Widget>[
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [_swichbutton(0), _swichbutton(1)],
                   ),
-                  _titleTextFormField(),
-                  _dueDateTimeFormField(),
-                  _noteTextFormField(),
-                  _confirmButton(context),
-                  Text(_newTodo!.tag!)
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          _isCommenting == false
+                              ?
+                              // ? GestureDetector(
+                              //     onTap: () {
+                              //       setState(() {
+                              //         _isCommenting = true;
+                              //       });
+                              //       FocusScope.of(context).focusedChild;
+                              //     },
+                              //child:
+                              Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    child: LinkTextAtoms(
+                                        text: _newTodo!.title,
+                                        textStyle: TextStyle(
+                                          fontFamily: 'font_1_honokamarugo_1.1',
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                        )),
+                                    // ),
+                                  ),
+                                )
+                              : Column(
+                                  children: [
+                                    _titleTextFormField(),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.4,
+                                    )
+                                  ],
+                                ),
+                          //  _dueDateTimeFormField(),
+                          // _noteTextFormField(),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(Icons.keyboard_arrow_down)),
+                      _confirmButton(context),
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _isCommenting = !_isCommenting;
+                            });
+                          },
+                          icon: _isCommenting
+                              ? Icon(
+                                  Icons.done,
+                                  color: Colors.green,
+                                )
+                              : Icon(Icons.edit))
+                    ],
+                  ),
                 ],
               ),
-            ),
-          ),
-        ));
+              // ),
+            ));
   }
 
   Widget _swichbutton(int type) {
@@ -143,9 +227,15 @@ class _TodoEditViewState extends State<TodoEditView> {
   }
 
   Widget _titleTextFormField() => TextFormField(
-        decoration: InputDecoration(labelText: "タイトル"),
+        autofocus: true, //キーボードを常に表示する
+        decoration: InputDecoration(
+          hintText: "note",
+          border: InputBorder.none,
+        ),
         initialValue: _newTodo!.title,
         onChanged: _setTitle,
+        maxLength: null,
+        maxLines: null,
       );
 
   void _setTitle(String title) {
@@ -193,7 +283,7 @@ class _TodoEditViewState extends State<TodoEditView> {
 
   Widget _confirmButton(BuildContext context) => ElevatedButton(
         child: const Text(
-          '作成',
+          '保存',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         style: ElevatedButton.styleFrom(

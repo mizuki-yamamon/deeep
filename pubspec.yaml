@@ -52,6 +52,7 @@ dependencies:
   path: ^1.8.0
 
   rxdart: ^0.27.1
+  url_launcher: ^6.0.10
 
 dev_dependencies:
   flutter_test:

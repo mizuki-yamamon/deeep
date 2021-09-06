@@ -12,6 +12,7 @@ class DBProvider {
 
   static Database? _database;
   static final _tableName = "Todo";
+  static final _tablePhotoName = "Photo";
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -31,21 +32,36 @@ class DBProvider {
 
     String path = join(documentsDirectory.path, "TodoDB.db");
 
-    return await openDatabase(path, version: 1, onCreate: _createTable);
+    return await openDatabase(path, version: 1, onCreate: (db, version) async {
+      await db.execute("CREATE TABLE $_tableName ("
+          "id TEXT PRIMARY KEY,"
+          "title TEXT,"
+          "dueDate TEXT,"
+          "note TEXT,"
+          "checker INTEGER,"
+          "number INTEGER,"
+          "tag TEXT,"
+          "model INTEGER"
+          ")");
+      await db.execute("CREATE TABLE $_tablePhotoName ("
+          "id TEXT PRIMARY KEY,"
+          "photoId TEXT"
+          ")");
+    });
   }
 
-  Future<void> _createTable(Database db, int version) async {
-    return await db.execute("CREATE TABLE $_tableName ("
-        "id TEXT PRIMARY KEY,"
-        "title TEXT,"
-        "dueDate TEXT,"
-        "note TEXT,"
-        "checker INTEGER,"
-        "number INTEGER,"
-        "tag TEXT,"
-        "model INTEGER"
-        ")");
-  }
+  // Future<void> _createTable(Database db, int version) async {
+  //   return await db.execute("CREATE TABLE $_tableName ("
+  //       "id TEXT PRIMARY KEY,"
+  //       "title TEXT,"
+  //       "dueDate TEXT,"
+  //       "note TEXT,"
+  //       "checker INTEGER,"
+  //       "number INTEGER,"
+  //       "tag TEXT,"
+  //       "model INTEGER"
+  //       ")");
+  // }
 
   createTodo(Todo todo) async {
     final db = await database;
