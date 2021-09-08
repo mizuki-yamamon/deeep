@@ -50,9 +50,16 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      // appBar: new AppBar(
-      //   title: new Text(widget.title),
-      // ),
+      appBar: new AppBar(
+        backgroundColor: Colors.grey[100],
+        elevation: 0,
+        leading: IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: Colors.black,
+            )),
+      ),
       body: Container(
         child: Column(
           children: <Widget>[

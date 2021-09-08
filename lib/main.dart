@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'components/todo_list/todo_list_view.dart';
 import 'configs/const_text.dart';
+import 'models/todo_data.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,17 +22,35 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return Provider<TodoBloc>(
-      create: (context) => new TodoBloc(),
-      dispose: (context, bloc) => bloc.dispose(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<TodoData>(create: (context) => TodoData()),
+        Provider<TodoBloc>(
+          create: (context) => new TodoBloc(),
+          dispose: (context, bloc) => bloc.dispose(),
+        ),
+      ],
       child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: ConstText.appTitle,
           theme: ThemeData(
+            primaryColor: Colors.grey[100],
+            backgroundColor: Colors.grey[100],
             brightness: Brightness.light,
+            iconTheme: const IconThemeData.fallback().copyWith(
+              color: Colors.black,
+            ),
           ),
           // ダークモード対応
-          darkTheme: ThemeData(brightness: Brightness.dark),
+          darkTheme: ThemeData(
+            primaryColor: Colors.black,
+            backgroundColor: Colors.black,
+            brightness: Brightness.dark,
+            iconTheme: const IconThemeData.fallback().copyWith(
+              color: Colors.white,
+            ),
+          ),
+          themeMode: ThemeMode.system,
           home: TodoListView()),
     );
   }

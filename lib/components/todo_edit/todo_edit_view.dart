@@ -162,19 +162,30 @@ class _TodoEditViewState extends State<TodoEditView> {
                             Navigator.pop(context);
                           },
                           icon: Icon(Icons.keyboard_arrow_down)),
-                      _confirmButton(context),
+                      // _confirmButton(context),
                       IconButton(
                           onPressed: () {
-                            setState(() {
-                              _isCommenting = !_isCommenting;
-                            });
+                            // setState(() {
+                            //   _isCommenting = !_isCommenting;
+                            // });
+                            if (_newTodo!.id == null) {
+                              //新規作成
+                              // List<Todo> _mandalas = [];
+                              String _id = Uuid().v4();
+                              _newTodo!.id = _id;
+                              _newTodo!.tag = widget.label;
+                              widget.todoBloc!.create(
+                                _newTodo!,
+                              );
+                            } else {
+                              widget.todoBloc!.update(_newTodo!);
+                            }
+                            Navigator.pop(context);
                           },
-                          icon: _isCommenting
-                              ? Icon(
-                                  Icons.done,
-                                  color: Colors.green,
-                                )
-                              : Icon(Icons.edit))
+                          icon: Icon(
+                            Icons.done,
+                            color: Colors.green,
+                          ))
                     ],
                   ),
                 ],
@@ -281,50 +292,34 @@ class _TodoEditViewState extends State<TodoEditView> {
     //_newTodo!.check = note;
   }
 
-  Widget _confirmButton(BuildContext context) => ElevatedButton(
-        child: const Text(
-          '保存',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        style: ElevatedButton.styleFrom(
-          primary: Colors.blue,
-          onPrimary: Colors.black,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        onPressed: () {
-          // print(_newTodo!.check.toString());
-          if (_newTodo!.id == null) {
-            // List<Todo> _mandalas = [];
+  // Widget _confirmButton(BuildContext context) => ElevatedButton(
+  //       child: const Text(
+  //         '保存',
+  //         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+  //       ),
+  //       style: ElevatedButton.styleFrom(
+  //         primary: Colors.blue,
+  //         onPrimary: Colors.black,
+  //         shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(10),
+  //         ),
+  //       ),
+  //       onPressed: () {
+  //         // print(_newTodo!.check.toString());
+  //         if (_newTodo!.id == null) {
+  //           // List<Todo> _mandalas = [];
 
-            String _id = Uuid().v4();
-            _newTodo!.id = _id;
-            _newTodo!.tag = widget.label;
-            // DBProvider.db.initDB(_id);
-            // if (todoList!.isNotEmpty) {
-            //   _newTodo!.number = todoList![todoList!.length - 1].number! + 1;
-            // }
-            widget.todoBloc!.create(
-              _newTodo!,
-            );
-            // for (int i = 0; i < 8; i++) {
-            //   todoBloc!.create(
-            //     Todo(
-            //         id: Uuid().v4(),
-            //         title: '',
-            //         note: '',
-            //         dueDate: DateTime.now(),
-            //         checker: 0,
-            //         number: i,
-            //         tag: _id),
-            //   );
-            // }
-          } else {
-            widget.todoBloc!.update(_newTodo!);
-          }
+  //           String _id = Uuid().v4();
+  //           _newTodo!.id = _id;
+  //           _newTodo!.tag = widget.label;
+  //           widget.todoBloc!.create(
+  //             _newTodo!,
+  //           );
+  //         } else {
+  //           widget.todoBloc!.update(_newTodo!);
+  //         }
 
-          Navigator.of(context).pop();
-        },
-      );
+  //         Navigator.of(context).pop();
+  //       },
+  //     );
 }
