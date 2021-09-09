@@ -28,7 +28,7 @@ class Todo {
     checker = 0;
     number = 0;
     tag = '';
-    model = 0;
+    model = 1; //マンダラをデフォルトに
   }
 
   // assignUUID() {

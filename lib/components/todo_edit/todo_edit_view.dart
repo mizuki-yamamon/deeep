@@ -12,6 +12,7 @@ class TodoEditView extends StatefulWidget {
   final TodoBloc? todoBloc;
   final Todo? todo;
   final String? label;
+  final List<Todo>? alltodos;
 
   TodoEditView({
     Key? key,
@@ -20,6 +21,7 @@ class TodoEditView extends StatefulWidget {
     @required this.todoBloc,
     @required this.todo,
     @required this.label,
+    @required this.alltodos,
   }) {
     // Dartでは参照渡しが行われるため、todoをそのまま編集してしまうと、
     // 更新せずにリスト画面に戻ったときも値が更新されてしまうため、
@@ -74,124 +76,124 @@ class _TodoEditViewState extends State<TodoEditView> {
 
   @override
   Widget build(BuildContext context) {
-    return
-        //  Scaffold(
-        //     appBar: AppBar(
-        //       backgroundColor: Colors.white,
-        //       leading: IconButton(
-        //         onPressed: () => Navigator.pop(context),
-        //         icon: Icon(
-        //           Icons.expand_more,
-        //           color: Colors.black,
-        //         ),
-        //       ),
-        //       title: Text(
-        //         '編集',
-        //         style: TextStyle(color: Colors.black),
-        //       ),
-        //       elevation: 0.0,
-        //     ),
-        //     body:
-        GestureDetector(
-            onTap: () {
-              FocusScope.of(context).unfocus();
-              setState(() {
-                _isCommenting = !_isCommenting;
-              });
-            },
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.9,
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
+    return GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+          setState(() {
+            _isCommenting = !_isCommenting;
+          });
+        },
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.9,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [_swichbutton(0), _swichbutton(1)],
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          _isCommenting == false
-                              ?
-                              // ? GestureDetector(
-                              //     onTap: () {
-                              //       setState(() {
-                              //         _isCommenting = true;
-                              //       });
-                              //       FocusScope.of(context).focusedChild;
-                              //     },
-                              //child:
-                              Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    child: LinkTextAtoms(
-                                        text: _newTodo!.title,
-                                        textStyle: TextStyle(
-                                          fontFamily: 'font_1_honokamarugo_1.1',
-                                          fontSize: 15,
-                                          color: Colors.black,
-                                        )),
-                                    // ),
-                                  ),
-                                )
-                              : Column(
-                                  children: [
-                                    _titleTextFormField(),
-                                    SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.4,
-                                    )
-                                  ],
-                                ),
-                          //  _dueDateTimeFormField(),
-                          // _noteTextFormField(),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(Icons.keyboard_arrow_down)),
-                      // _confirmButton(context),
-                      IconButton(
-                          onPressed: () {
-                            // setState(() {
-                            //   _isCommenting = !_isCommenting;
-                            // });
-                            if (_newTodo!.id == null) {
-                              //新規作成
-                              // List<Todo> _mandalas = [];
-                              String _id = Uuid().v4();
-                              _newTodo!.id = _id;
-                              _newTodo!.tag = widget.label;
-                              widget.todoBloc!.create(
-                                _newTodo!,
-                              );
-                            } else {
-                              widget.todoBloc!.update(_newTodo!);
-                            }
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(
-                            Icons.done,
-                            color: Colors.green,
-                          ))
-                    ],
-                  ),
+                  IconButton(
+                      onPressed: () {
+                        _delete();
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.delete)),
+                  // _confirmButton(context),
+                  widget.todo!.title!.isEmpty
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [_swichbutton(0), _swichbutton(1)],
+                        )
+                      : Container(),
                 ],
               ),
-              // ),
-            ));
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      _isCommenting == false
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                child: LinkTextAtoms(
+                                    text: _newTodo!.title,
+                                    textStyle: TextStyle(
+                                      fontFamily: 'font_1_honokamarugo_1.1',
+                                      fontSize: 15,
+                                      color: Colors.black,
+                                    )),
+                                // ),
+                              ),
+                            )
+                          : Column(
+                              children: [
+                                _titleTextFormField(),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.4,
+                                )
+                              ],
+                            ),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.keyboard_arrow_down)),
+                  // _confirmButton(context),
+                  IconButton(
+                      onPressed: () {
+                        // setState(() {
+                        //   _isCommenting = !_isCommenting;
+                        // });
+                        if (_newTodo!.title!.isNotEmpty) {
+                          if (_newTodo!.id == null) {
+                            //新規作成
+                            // List<Todo> _mandalas = [];
+                            String _id = Uuid().v4();
+                            _newTodo!.id = _id;
+                            _newTodo!.tag = widget.label;
+                            widget.todoBloc!.create(
+                              _newTodo!,
+                            );
+                          } else {
+                            widget.todoBloc!.update(_newTodo!);
+                          }
+                        }
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(
+                        Icons.done,
+                        color: Colors.green,
+                      ))
+                ],
+              ),
+            ],
+          ),
+          // ),
+        ));
+  }
+
+  _delete() async {
+    await Future.forEach(widget.alltodos!, (Todo element) async {
+      if (element.id == widget.todo!.id) {
+        widget.todoBloc!.delete(element.id!);
+      }
+      if (element.tag!.contains(widget.todo!.tag! + widget.todo!.id!)) {
+        print(element.id);
+        widget.todoBloc!.delete(element.id!);
+      }
+      // }
+    });
+    print('完了');
   }
 
   Widget _swichbutton(int type) {
@@ -201,15 +203,15 @@ class _TodoEditViewState extends State<TodoEditView> {
           _newTodo!.model = type;
         });
       },
-      child: Container(
-        padding: const EdgeInsets.all(5.0),
-        // width: 200,
-        decoration: BoxDecoration(
-          border: Border.all(color: _buttonColor(type)),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          padding: const EdgeInsets.all(5.0),
+          // width: 200,
+          decoration: BoxDecoration(
+            border: Border.all(color: _buttonColor(type)),
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Column(
               children: type == 0
                   ? [
@@ -217,16 +219,14 @@ class _TodoEditViewState extends State<TodoEditView> {
                         Icons.layers,
                         color: _buttonColor(type),
                       ),
-                      Text("レイヤータイプ",
-                          style: TextStyle(color: _buttonColor(type))),
+                      Text("レイヤー", style: TextStyle(color: _buttonColor(type))),
                     ]
                   : [
                       Icon(
                         Icons.apps,
                         color: _buttonColor(type),
                       ),
-                      Text("マンダラタイプ",
-                          style: TextStyle(color: _buttonColor(type))),
+                      Text("マンダラ", style: TextStyle(color: _buttonColor(type))),
                     ]),
         ),
       ),
@@ -291,35 +291,4 @@ class _TodoEditViewState extends State<TodoEditView> {
     _newTodo!.note = note;
     //_newTodo!.check = note;
   }
-
-  // Widget _confirmButton(BuildContext context) => ElevatedButton(
-  //       child: const Text(
-  //         '保存',
-  //         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-  //       ),
-  //       style: ElevatedButton.styleFrom(
-  //         primary: Colors.blue,
-  //         onPrimary: Colors.black,
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(10),
-  //         ),
-  //       ),
-  //       onPressed: () {
-  //         // print(_newTodo!.check.toString());
-  //         if (_newTodo!.id == null) {
-  //           // List<Todo> _mandalas = [];
-
-  //           String _id = Uuid().v4();
-  //           _newTodo!.id = _id;
-  //           _newTodo!.tag = widget.label;
-  //           widget.todoBloc!.create(
-  //             _newTodo!,
-  //           );
-  //         } else {
-  //           widget.todoBloc!.update(_newTodo!);
-  //         }
-
-  //         Navigator.of(context).pop();
-  //       },
-  //     );
 }

@@ -1,4 +1,5 @@
 import 'package:deep/components/mandaraTile.dart';
+import 'package:deep/components/todo_edit/todo_edit_view.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/models/todo_data.dart';
 import 'package:deep/repositories/db_provider.dart';
@@ -41,7 +42,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
   // List<Tag> _aroundTags = [];
 
   int variableSet = 0;
-  List<StaggeredTileExtended> _listStaggeredTileExtended =
+  List<StaggeredTileExtended> _listStaggeredMandaraExtended =
       <StaggeredTileExtended>[
     StaggeredTileExtended.count(1, 1),
     StaggeredTileExtended.count(1, 1),
@@ -53,6 +54,8 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     StaggeredTileExtended.count(1, 1),
     StaggeredTileExtended.count(1, 1),
   ];
+  List<StaggeredTileExtended> _listStaggeredLayerExtended =
+      <StaggeredTileExtended>[];
 
   @override
   void initState() {
@@ -110,11 +113,46 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
             _todoList[index],
             _pretodo,
             index,
-            _todoList,
-            //  _allTodos,
-
+            // _todoList,
+            _allTodos,
             1))
         .toList();
+  }
+
+  _appbarWidget(Todo todo, TodoBloc _bloc, List<Todo> alltodo) {
+    return AppBar(
+      backgroundColor: Colors.grey[100],
+      centerTitle: true,
+      title: Text(
+        todo.tag == 'Todo'
+            ? ('1層')
+            : (((todo.tag!.length - 4) / 36) + 1).toStringAsFixed(0) + '層',
+        style: TextStyle(color: Colors.black),
+      ),
+      elevation: 0.0,
+      leading: IconButton(
+          onPressed: () {
+            Navigator.popUntil(
+                context, (Route<dynamic> route) => route.isFirst);
+          },
+          icon: Icon(Icons.fast_rewind, color: Colors.black)),
+      actions: [
+        IconButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SearchScreen(
+                            bloc: _bloc,
+                            alltodos: alltodo,
+                          )));
+            },
+            icon: Icon(
+              Icons.search,
+              color: Colors.black,
+            ))
+      ],
+    );
   }
 
   @override
@@ -128,171 +166,209 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     return Consumer<TodoData>(builder: (context, model, child) {
       print(model.currentTodo!.id);
       print('model.currentTodo!.id');
-      _createTodo(model.currentTodo!);
-      return StreamBuilder<List<Todo>>(
-          stream: _bloc.todoStream,
-          builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
-            if (snapshot.hasData) {
-              //_allList = snapshot.data!;
-              List<Todo> _todoList = snapshot.data!
-                  .where((element) =>
-                      element.tag ==
-                      model.currentTodo!.tag! + model.currentTodo!.id!)
-                  .toList();
-              Todo _centerTodo = snapshot.data!
-                  .where((element) => element.id == model.currentTodo!.id)
-                  .first;
+      if (model.currentTodo!.model == 1) {
+        _createTodo(model.currentTodo!);
+      }
+      if (model.currentTodo!.model == 1) {
+        return StreamBuilder<List<Todo>>(
+            stream: _bloc.todoStream,
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
+              if (snapshot.hasData) {
+                //_allList = snapshot.data!;
+                List<Todo> _todoList = snapshot.data!
+                    .where((element) =>
+                        element.tag ==
+                        model.currentTodo!.tag! + model.currentTodo!.id!)
+                    .toList();
+                Todo _centerTodo = snapshot.data!
+                    .where((element) => element.id == model.currentTodo!.id)
+                    .first;
 
-              if (_todoList.length > 4) {
-                _todoList.sort((a, b) => a.number!.compareTo(b.number!));
-                _todoList.insert(4, _centerTodo);
+                if (_todoList.length > 4) {
+                  _todoList.sort((a, b) => a.number!.compareTo(b.number!));
+                  _todoList.insert(4, _centerTodo);
+                  return Scaffold(
+                      backgroundColor: Colors.grey[100],
+                      appBar: _appbarWidget(
+                          model.currentTodo!, _bloc, snapshot.data!),
+                      body: Container(
+                          width: width,
+                          height: height,
+                          color: Colors.grey[100],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: height * 0.1,
+                              ),
+                              Expanded(
+                                child: ReorderableItemsView(
+                                  mainAxisSpacing: 0,
+                                  children: [
+                                    ..._content(model.currentTodo!, _todoList,
+                                        snapshot.data!)
+                                  ],
+                                  crossAxisCount: 3,
+                                  isGrid: true,
+                                  staggeredTiles: _listStaggeredMandaraExtended,
+                                  longPressToDrag: true,
+                                  onReorder:
+                                      (int oldIndex, int newIndex) async {
+                                    if (oldIndex == 4) {
+                                      ShowFlushbar.showFloatingFlushbar(
+                                          context, 'エラー', '中心は動かすことができません');
+                                    } else {
+                                      Todo _oldtodo = _todoList[oldIndex];
+                                      Todo _newtodo = _todoList[newIndex];
+                                      int _old = _oldtodo.number!;
+                                      int _new = _newtodo.number!;
+                                      _oldtodo.number = _new;
+                                      _newtodo.number = _old;
+                                      await _bloc.update(
+                                        _oldtodo,
+                                      );
+                                      await _bloc.update(
+                                        _newtodo,
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          )));
+                } else {
+                  return Scaffold(
+                      backgroundColor: Colors.grey[100],
+                      body: Center(child: CircularProgressIndicator()));
+                }
+              } else {
                 return Scaffold(
                     backgroundColor: Colors.grey[100],
-                    appBar: AppBar(
-                      backgroundColor: Colors.grey[100],
-                      centerTitle: true,
-                      title: Text(
-                        widget.layer.toString() + '層目',
-                        style: TextStyle(color: Colors.black),
-                      ),
-                      elevation: 0.0,
-                      leading: IconButton(
-                          onPressed: () {
-                            Navigator.popUntil(context,
-                                (Route<dynamic> route) => route.isFirst);
-                          },
-                          icon: Icon(Icons.fast_rewind, color: Colors.black)),
-                      // Here we take the value from the LayerGridScreen object that was created by
-                      // the App.build method, and use it to set our appbar title.
-                      //title: Text('Map'),
-                      actions: [
-                        IconButton(
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SearchScreen(
-                                            bloc: _bloc,
-                                            alltodos: snapshot.data!,
-                                          )));
-                            },
-                            icon: Icon(
-                              Icons.search,
-                              // color: Colors.black,
-                            ))
-                      ],
-                    ),
-                    body: Container(
-                        width: width,
-                        height: height,
-                        color: Colors.grey[100],
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              height: height * 0.1,
-                            ),
-                            Expanded(
-                              child: ReorderableItemsView(
-                                mainAxisSpacing: 0,
-                                children: [
-                                  ..._content(model.currentTodo!, _todoList,
-                                      snapshot.data!)
-                                  // .insert(
-                                  //     4,
-                                  //     CenterTile(
-                                  //       Key(widget.todo.id!),
-                                  //       widget.todo,
-                                  //     )),
-                                ],
-                                crossAxisCount: 3,
-                                isGrid: true,
-                                staggeredTiles: _listStaggeredTileExtended,
-                                longPressToDrag: true,
-                                onReorder: (int oldIndex, int newIndex) async {
-                                  if (oldIndex == 4) {
-                                    ShowFlushbar.showFloatingFlushbar(
-                                        context, 'エラー', '中心は動かすことができません');
-                                  } else {
-                                    Todo _oldtodo = _todoList[oldIndex];
-                                    Todo _newtodo = _todoList[newIndex];
-                                    int _old = _oldtodo.number!;
-                                    int _new = _newtodo.number!;
-                                    _oldtodo.number = _new;
-                                    _newtodo.number = _old;
-                                    await _bloc.update(
-                                      _oldtodo,
-                                    );
-                                    await _bloc.update(
-                                      _newtodo,
-                                    );
-                                  }
+                    body: Center(child: CircularProgressIndicator()));
+              }
+            });
+      } else {
+        _listStaggeredLayerExtended = [
+          StaggeredTileExtended.count(1, 1),
+          StaggeredTileExtended.count(1, 1),
+          StaggeredTileExtended.count(1, 1)
+        ];
+        return StreamBuilder<List<Todo>>(
+            stream: _bloc.todoStream,
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
+              if (snapshot.hasData) {
+                List<Todo> _todoList = snapshot.data!
+                    .where((element) =>
+                        element.tag ==
+                        (model.currentTodo!.tag! + model.currentTodo!.id!))
+                    .toList();
+                // _todoList.where((element) => element.tag == 'Todo').toList();
+                _todoList.sort((a, b) => a.number!.compareTo(b.number!));
+
+                Todo _centerTodo = snapshot.data!
+                    .where((element) => element.id == model.currentTodo!.id)
+                    .first;
+                snapshot.data!
+                    .where((element) =>
+                        element.tag ==
+                        (model.currentTodo!.tag! + model.currentTodo!.id!))
+                    .toList()
+                    .forEach((element) {
+                  _listStaggeredLayerExtended
+                      .add(StaggeredTileExtended.count(1, 1));
+                });
+                _todoList.insert(0, _centerTodo);
+                return Scaffold(
+                    backgroundColor: Colors.grey[100],
+                    appBar: _appbarWidget(
+                        model.currentTodo!, _bloc, snapshot.data!),
+                    body: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 50,
+                        ),
+                        Expanded(
+                          child: ReorderableItemsView(
+                            children: [
+                              ..._content(model.currentTodo!, _todoList,
+                                  snapshot.data!),
+                            ],
+                            header: Card(
+                              color: Colors.blue[300],
+                              child: new InkWell(
+                                onTap: () {
+                                  // _moveToCreateView(context, _bloc, _todoList);
+                                  showModalBottomSheet(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20.0),
+                                              topLeft: Radius.circular(20.0))),
+                                      backgroundColor: Colors.white,
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (context) {
+                                        return TodoEditView(
+                                          number: _todoList.isEmpty
+                                              ? 0
+                                              : _todoList[_todoList.length - 1]
+                                                      .number! +
+                                                  1,
+                                          // todoList: _todoList,
+                                          todoBloc: _bloc,
+                                          todo: Todo.newTodo(),
+                                          label: model.currentTodo!.tag! +
+                                              model.currentTodo!.id!,
+                                          alltodos: snapshot.data!,
+                                        );
+                                      });
                                 },
+                                child: new Center(
+                                  child: new Padding(
+                                      padding: EdgeInsets.all(4.0),
+                                      child: Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                      )),
+                                ),
                               ),
                             ),
-                          ],
-                        )));
+                            crossAxisCount: 3,
+                            isGrid: true,
+                            staggeredTiles: _listStaggeredLayerExtended,
+                            longPressToDrag: true,
+                            onReorder: (int oldIndex, int newIndex) async {
+                              if (oldIndex == 0) {
+                                ShowFlushbar.showFloatingFlushbar(
+                                    context, 'エラー', '親のセルは動かすことができません');
+                              } else {
+                                Todo _oldtodo = _todoList[oldIndex];
+                                Todo _newtodo = _todoList[newIndex];
+                                int _old = _oldtodo.number!;
+                                int _new = _newtodo.number!;
+                                _oldtodo.number = _new;
+                                _newtodo.number = _old;
+                                await _bloc.update(
+                                  _oldtodo,
+                                );
+                                await _bloc.update(_newtodo);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ));
               } else {
-                return Center(child: CircularProgressIndicator());
+                return Scaffold(
+                    backgroundColor: Colors.grey[100],
+                    body: Center(child: CircularProgressIndicator()));
               }
-            } else {
-              return Center(child: CircularProgressIndicator());
-            }
-          });
+            });
+      }
     });
   }
 }
 
-class CenterTile extends StatelessWidget {
-  final Todo todo;
-
-  CenterTile(
-    Key key,
-    this.todo,
-  ) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final _bloc = Provider.of<TodoBloc>(context, listen: false);
-    return new Card(
-      color: todo.checker == 0 ? Colors.white : Colors.blue[200],
-      child: new InkWell(
-        onDoubleTap: () {
-          Navigator.pop(context);
-        },
-        onTap: () {
-          print(todo.number);
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //         builder: (context) => TodoEditView(
-          //             todoList: todos,
-          //             todoBloc: _bloc,
-          //             todo: todo,
-          //             label: label)));
-        },
-        child:
-            // Stack(
-            //   children: [
-            new Center(
-          child: new Padding(
-              padding: EdgeInsets.all(4.0),
-              child: new Text(
-                todo.title!,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              )),
-        ),
-        // Align(
-        //     alignment: Alignment.bottomRight,
-        //     child: IconButton(
-        //         onPressed: () {
-        //           _bloc.delete(todo.id!, label);
-        //         },
-        //         icon: Icon(Icons.delete //more_horiz),
-        //             )))
-        //   ],
-        // ),
-      ),
-    );
-  }
-}
+//

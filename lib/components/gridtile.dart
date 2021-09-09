@@ -1,5 +1,4 @@
 import 'package:deep/components/todo_edit/todo_edit_view.dart';
-import 'package:deep/components/todo_list/layer_view.dart';
 import 'package:deep/components/todo_list/mandala_grid.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/models/todo_data.dart';
@@ -7,13 +6,12 @@ import 'package:deep/repositories/todo_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class GridTiles extends StatelessWidget {
+class GridTiles extends StatefulWidget {
   final Todo todo;
   final Todo pretodo;
   final int index;
   final List<Todo> alltodos;
   final int type;
-  // final List<Todo> allTodos;
 
   GridTiles(
     Key key,
@@ -26,18 +24,40 @@ class GridTiles extends StatelessWidget {
     //  this.allTodos,
   ) : super(key: key);
 
+  @override
+  State<GridTiles> createState() => _GridTilesState();
+}
+
+class _GridTilesState extends State<GridTiles>
+    with SingleTickerProviderStateMixin {
   var _options = ["何もしない", '削除する', 'チェック'];
-  var _options2 = [
-    "何もしない",
-    '削除する',
-  ];
+  Animation? _animation;
+  AnimationController? _animationController;
+
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController!.dispose();
+
+    super.dispose();
+  }
 
   _delete(TodoBloc _bloc) async {
-    await Future.forEach(alltodos, (Todo element) async {
-      if (element.id == todo.id) {
+    await Future.forEach(widget.alltodos, (Todo element) async {
+      if (element.id == widget.todo.id) {
         _bloc.delete(element.id!);
       }
-      if (element.tag!.contains(todo.tag! + todo.id!)) {
+      if (element.tag!.contains(widget.todo.tag! + widget.todo.id!)) {
         //  print(element.tag);
         _bloc.delete(element.id!);
       }
@@ -46,80 +66,62 @@ class GridTiles extends StatelessWidget {
     print('完了');
   }
 
-  _colors() {
-    if (type == 1 && index == 4) {}
-  }
-
   @override
   Widget build(BuildContext context) {
+    if (widget.pretodo.tag == 'Todo' && widget.type == 0) {
+      Future.delayed(new Duration(milliseconds: 180 * widget.index))
+          .then((value) => _animationController!.forward());
+    } else {
+      if (widget.pretodo.model == 0) {
+        //レイヤー型
+        Future.delayed(new Duration(milliseconds: 180 * widget.index))
+            .then((value) => _animationController!.forward());
+      }
+      if (widget.pretodo.model == 1) {
+        Future.delayed(
+                new Duration(milliseconds: 180 * (widget.index - 4).abs()))
+            .then((value) => _animationController!.forward());
+      }
+    }
+
     final _bloc = Provider.of<TodoBloc>(context, listen: false);
     return Consumer<TodoData>(builder: (context, model, child) {
-      return Hero(
-          tag: 'tag' + todo.id!,
-          child: new Card(
-            color: type == 1 && index == 4
-                ? Colors.green[200]
-                : type == 1 && todo.checker == 1
-                    ? Colors.blue[200]
-                    : Colors.white,
-            child: new InkWell(
-              // onForcePressStart: (a) {
-              //   Provider.of<TriggerData>(context, listen: false).trigger = true;
-              // },
-              // onLongPressEnd: (a) {
-              //   Provider.of<TriggerData>(context, listen: false).trigger = false;
-              // },
+      return FadeTransition(
+        opacity: _animationController!,
+        child: Hero(
+            tag: 'tag' + widget.todo.id!,
+            child: new Card(
+              color: widget.todo.id == widget.pretodo.id && widget.type != 0
+                  ? Colors.blue[300]
+                  : Colors.white,
+              child: new InkWell(
+                onDoubleTap: () async {
+                  print(widget.todo.number);
+                  print(widget.todo.tag);
 
-              onDoubleTap: () async {
-                print(todo.number);
-                print(todo.tag);
-
-                if (todo.title!.isEmpty) {
-                  showModalBottomSheet(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                      ),
-                      backgroundColor: Colors.transparent,
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (context) {
-                        return TodoEditView(
-                          number: todo.number,
-                          //todoList: todos,
-                          todoBloc: _bloc,
-                          todo: todo,
-                          label: todo.tag,
-                        );
-                      });
-
-                  // Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (context) => TodoEditView(
-                  //               number: todo.number,
-                  //               //todoList: todos,
-                  //               todoBloc: _bloc,
-                  //               todo: todo,
-                  //               label: todo.tag,
-                  //             )));
-                } else {
-                  if (type == 0) {
-                    if (todo.model == 0) {
-                      model.updateTodo(todo);
-                      model.updatePreTodo(pretodo);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => LayerView(
-                            todo: todo, layer: 1, // bloc: _bloc,
-                            //問題をtitleかtagsで分けるため
-                          ),
-                        ),
-                      );
-                      model.notify();
-                    } else if (todo.model == 1) {
-                      model.updateTodo(todo);
-                      model.updatePreTodo(pretodo);
+                  if (widget.todo.title!.isEmpty) {
+                    showModalBottomSheet(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(20.0),
+                                topLeft: Radius.circular(20.0))),
+                        backgroundColor: Colors.white,
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) {
+                          return TodoEditView(
+                            number: widget.todo.number,
+                            //todoList: todos,
+                            todoBloc: _bloc,
+                            todo: widget.todo,
+                            label: widget.todo.tag,
+                            alltodos: widget.alltodos,
+                          );
+                        });
+                  } else {
+                    if (widget.type == 0) {
+                      model.updateTodo(widget.todo);
+                      model.updatePreTodo(widget.pretodo);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -131,199 +133,78 @@ class GridTiles extends StatelessWidget {
                         ),
                       );
                       model.notify();
-                    }
-                  } else {
-                    if (todo.id == pretodo.id) {
-                      if (todo.tag == 'Todo') {
-                        Navigator.pop(context);
+                      // }
+                    } else {
+                      if (widget.todo.id == widget.pretodo.id) {
+                        if (widget.todo.tag == 'Todo') {
+                          Navigator.pop(context);
+                        } else {
+                          print('korekore');
+
+                          model.updateTodo(widget.alltodos
+                              .where((element) =>
+                                  element.id ==
+                                  widget.todo.tag!.substring(
+                                      widget.todo.tag!.length - 36,
+                                      widget.todo.tag!.length))
+                              .toList()
+                              .cast<Todo>()
+                              .first);
+                          //model.updatePreTodo(widget.pretodo);
+                          model.notify();
+                        }
                       } else {
-                        model.updateTodo(model.preTodo!);
+                        model.updatePreTodo(widget.pretodo);
+                        model.updateTodo(widget.todo);
                         model.notify();
                       }
                     }
-                    // } else if (type == 1 && index == 4) {
-                    //   model.updateTodo(pretodo);
-                    //   model.notify();
-                    // } else if (type == 2 && index == 0) {
-                    //   model.updateTodo(pretodo);
-                    //   model.notify();
-                    // }
-                    else {
-                      model.updatePreTodo(pretodo);
-                      model.updateTodo(todo);
-                      model.notify();
-                      // if (todo.model == 0) {
-                      //   model.updateTodo(todo);
-                      //   model.notify();
-
-                      //   // Navigator.push(
-                      //   //   context,
-                      //   //   MaterialPageRoute(
-                      //   //     builder: (_) => LayerView(
-                      //   //       todo: todo, layer: 1, // bloc: _bloc,
-                      //   //       //問題をtitleかtagsで分けるため
-                      //   //     ),
-                      //   //   ),
-                      //   // );
-                      // } else if (todo.model == 1) {
-                      //   model.updateTodo(todo);
-                      //   model.notify();
-                      //   //Provider.of<TodoData>(context).currentTodo = todo;
-                      //   // Navigator.push(
-                      //   //   context,
-                      //   //   MaterialPageRoute(
-                      //   //     builder: (_) => MandalaGridScreen(
-                      //   //       todo: todo, layer: 1, bloc: _bloc,
-                      //   //       //問題をtitleかtagsで分けるため
-                      //   //     ),
-                      //   //   ),
-                      //   // );
-                      // }
-                    }
                   }
-                }
 
-                // }
-              },
-              onTap: () {
-                showModalBottomSheet(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(20.0),
-                            topLeft: Radius.circular(20.0))),
-                    backgroundColor: Colors.white,
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (context) {
-                      return TodoEditView(
-                        number: todo.number,
-                        // todoList: todos,
-                        todoBloc: _bloc,
-                        todo: todo,
-                        label: todo.tag,
-                      );
-                    });
-                print(todo.number);
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => TodoEditView(
-                //               number: todo.number,
-                //               // todoList: todos,
-                //               todoBloc: _bloc,
-                //               todo: todo,
-                //               label: todo.tag,
-                //             )));
-              },
-              child: type == 1
-                  ? Center(
-                      child: new Padding(
-                          padding: EdgeInsets.all(4.0),
-                          child: new Text(
-                            todo.title!,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    index == 4 ? Colors.white : Colors.black),
-                          )),
-                    )
-                  : Stack(
-                      children: [
-                        new Center(
-                          child: new Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: new Text(
-                              todo.title!,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        type == 2 && index == 0
-                            ? Container()
-                            : Align(
-                                alignment: Alignment.bottomRight,
-                                child: PopupMenuButton<String>(
-                                    icon: Icon(
-                                      Icons.more_horiz,
-                                      color: Colors.black87,
-                                    ),
-                                    onSelected: (String s) {
-                                      if (s == '削除する') {
-                                        _delete(_bloc);
-                                      }
-                                    },
-                                    itemBuilder: (BuildContext context) {
-                                      if (type == 2) {
-                                        return _options.map((String s) {
-                                          return PopupMenuItem(
-                                            child: s == 'チェック'
-                                                ? StatefulBuilder(builder:
-                                                    (context, setState) {
-                                                    return Checkbox(
-                                                        value: todo.checker == 0
-                                                            ? false
-                                                            : true,
-                                                        onChanged: (cheack) {
-                                                          _bloc.update(Todo(
-                                                              id: todo.id,
-                                                              title: todo.title,
-                                                              dueDate:
-                                                                  todo.dueDate,
-                                                              note: todo.note,
-                                                              checker: cheack ==
-                                                                      false
-                                                                  ? 0
-                                                                  : 1,
-                                                              number:
-                                                                  todo.number,
-                                                              tag: todo.tag,
-                                                              model:
-                                                                  todo.model));
-                                                          Navigator.pop(
-                                                              context);
-                                                        });
-                                                  })
-                                                : Text(
-                                                    s,
-                                                    style: TextStyle(
-                                                      // fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontFamily:
-                                                          'font_1_honokamarugo_1.1',
-                                                      color: s == '削除する'
-                                                          ? Colors.red
-                                                          : Colors.black,
-                                                    ),
-                                                  ),
-                                            value: s,
-                                          );
-                                        }).toList();
-                                      } else {
-                                        return _options2.map((String s) {
-                                          return PopupMenuItem(
-                                            child: Text(
-                                              s,
-                                              style: TextStyle(
-                                                // fontSize: 20,
-                                                fontWeight: FontWeight.bold,
-                                                fontFamily:
-                                                    'font_1_honokamarugo_1.1',
-                                                color: s == '削除する'
-                                                    ? Colors.red
-                                                    : Colors.black,
-                                              ),
-                                            ),
-                                            value: s,
-                                          );
-                                        }).toList();
-                                      }
-                                    }),
-                              )
-                      ],
+                  // }
+                },
+                onTap: () {
+                  showModalBottomSheet(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(20.0),
+                              topLeft: Radius.circular(20.0))),
+                      backgroundColor: Colors.white,
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) {
+                        return TodoEditView(
+                          number: widget.todo.number,
+                          // todoList: todos,
+                          todoBloc: _bloc,
+                          todo: widget.todo,
+                          label: widget.todo.tag,
+                          alltodos: widget.alltodos,
+                        );
+                      });
+                  print(widget.todo.number);
+                },
+                child:
+                    // Stack(
+                    //   children: [
+                    new Center(
+                  child: new Padding(
+                    padding: EdgeInsets.all(4.0),
+                    child: new Text(
+                      widget.todo.title!,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: widget.todo.id == widget.pretodo.id &&
+                                  widget.type != 0
+                              ? Colors.white
+                              : Colors.black),
                     ),
-            ),
-          ));
+                  ),
+                ),
+              ),
+            )),
+      );
+      // }
     });
   }
 }

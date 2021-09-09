@@ -1,11 +1,12 @@
 import 'package:deep/components/gridtile.dart';
 import 'package:deep/components/todo_edit/todo_edit_view.dart';
-import 'package:deep/configs/const_text.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/repositories/todo_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderableitemsview/reorderableitemsview.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../search_screen.dart';
 
@@ -16,12 +17,53 @@ class TodoListView extends StatefulWidget {
 
 class _TodoListViewState extends State<TodoListView> {
   String a = 'Todo';
+  PackageInfo? _packageInfo;
+  String formURL =
+      'https://docs.google.com/forms/d/e/1FAIpQLScppcLpy3lsW0cT_5vp4tCBWI9xYsRbuooYrGVTIqNcc1LBDg/viewform?usp=sf_link';
 
   @override
   void initState() {
     a.contains('Td');
     // TODO: implement initState
     super.initState();
+    _getPackageInfo();
+  }
+
+  _getPackageInfo() async {
+    _packageInfo = await PackageInfo.fromPlatform();
+  }
+
+  _settings() {
+    showModalBottomSheet<int>(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // ListTile(
+              //   leading: Icon(Icons.help),
+              //   title: Text('How to use it'),
+              //   onTap: () => Navigator.of(context).pop(2),
+              // ),
+              ListTile(
+                leading: Icon(Icons.support_agent),
+                title: Text('request'),
+                onTap: () async {
+                  if (await canLaunch(formURL)) {
+                    await launch(formURL, forceSafariVC: false);
+                  } else {
+                    print("error");
+                  }
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.info),
+                title: Text('Version: ${_packageInfo!.version}'),
+                onTap: () => Navigator.of(context).pop(3),
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -50,13 +92,15 @@ class _TodoListViewState extends State<TodoListView> {
 
             return Scaffold(
                 appBar: AppBar(
-                  // backgroundColor: Colors.grey[100],
+                  backgroundColor: Colors.grey[100],
                   elevation: 0,
                   leading: IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _settings();
+                      },
                       icon: Icon(
                         Icons.settings,
-                        //color: Colors.black,
+                        color: Colors.black,
                       )),
                   actions: [
                     IconButton(
@@ -71,7 +115,7 @@ class _TodoListViewState extends State<TodoListView> {
                         },
                         icon: Icon(
                           Icons.search,
-                          // color: Colors.black,
+                          color: Colors.black,
                         ))
                   ],
                   //title: Text(ConstText.todoListView),
@@ -79,7 +123,7 @@ class _TodoListViewState extends State<TodoListView> {
                 body: Container(
                   width: width,
                   height: height,
-                  //color: Colors.grey[100],
+                  color: Colors.grey[100],
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -115,6 +159,7 @@ class _TodoListViewState extends State<TodoListView> {
                                           todoBloc: _bloc,
                                           todo: Todo.newTodo(),
                                           label: 'Todo',
+                                          alltodos: snapshot.data!,
                                         );
                                       });
                                 },
@@ -132,29 +177,6 @@ class _TodoListViewState extends State<TodoListView> {
                             isGrid: true,
                             staggeredTiles: _listStaggeredTileExtended,
                             longPressToDrag: true,
-                            // itemCount: snapshot.data!.length,
-                            // itemBuilder: (BuildContext context, int index) {
-                            //Todo todo = snapshot.data![index];
-
-                            // return Dismissible(
-                            //   key: Key(todo.id!),
-                            //   background: _backgroundOfDismissible(),
-                            //   secondaryBackground: _secondaryBackgroundOfDismissible(),
-                            //   onDismissed: (direction) {
-                            //     _bloc.delete(todo.id!);
-                            //   },
-                            //   child: Card(
-                            //       child: ListTile(
-                            //     onTap: () {
-                            //       _moveToEditView(context, _bloc, todo);
-                            //     },
-                            //     title: Text("${todo.title}"),
-                            //     subtitle: Text("${todo.note}"),
-                            //     trailing: Text("${todo.dueDate!.toLocal().toString()}"),
-                            //     isThreeLine: true,
-                            //   )),
-                            // );
-                            //},
                             onReorder: (int oldIndex, int newIndex) async {
                               Todo _oldtodo = _todoList[oldIndex];
                               Todo _newtodo = _todoList[newIndex];
@@ -166,32 +188,6 @@ class _TodoListViewState extends State<TodoListView> {
                                 _oldtodo,
                               );
                               await _bloc.update(_newtodo);
-                              // if ((oldIndex - newIndex).abs() == 1) {
-                              //   //隣同士
-                              //   _todoList.insert(newIndex, _todoList.removeAt(oldIndex));
-                              //   // _bloc.update(_todoList);
-                              // } else if (newIndex < oldIndex) {
-
-                              //   _todoList.insert(newIndex, _todoList.removeAt(oldIndex));
-                              //   _todoList.insert(oldIndex, _todoList.removeAt(newIndex + 1));
-                              // } else if (newIndex > oldIndex) {
-                              //   _todoList.insert(newIndex, _todoList.removeAt(oldIndex));
-                              //   _todoList.insert(oldIndex, _todoList.removeAt(newIndex - 1));
-
-                              //   //_tiles.insert(oldIndex - 1, _tiles.removeAt(newIndex));
-                              // }
-                              //}
-                              // else{
-                              //   return Center(child: CircularProgressIndicator());
-                              // },)
-
-                              // floatingActionButton: FloatingActionButton(
-                              //   onPressed: () {
-                              //     _moveToCreateView(context, _bloc);
-                              //   },
-                              //   child: Icon(Icons.add, size: 40),
-                              // ),
-                              // );
                             }),
                       ),
                     ],
@@ -208,7 +204,6 @@ class _TodoListViewState extends State<TodoListView> {
     List<Todo> _todoList,
     List<Todo> _allTodos,
   ) {
-    //double width = MediaQuery.of(context).size.width;
     return _todoList
         .asMap()
         .keys
@@ -223,8 +218,6 @@ class _TodoListViewState extends State<TodoListView> {
               _allTodos,
               0),
         )
-        // _Example01Tile(Key(_tags[index].id!), _tags[index],
-        //     _tags, index, widget.firstTag.id!))
         .toList();
   }
 }
