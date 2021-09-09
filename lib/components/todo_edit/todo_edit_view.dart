@@ -238,6 +238,7 @@ class _TodoEditViewState extends State<TodoEditView> {
   }
 
   Widget _titleTextFormField() => TextFormField(
+        style: TextStyle(color: Colors.black),
         autofocus: true, //キーボードを常に表示する
         decoration: InputDecoration(
           hintText: "note",
@@ -253,42 +254,42 @@ class _TodoEditViewState extends State<TodoEditView> {
     _newTodo!.title = title;
   }
 
-  Widget _dueDateTimeFormField() => DateTimeField(
-      format: _format,
-      decoration: InputDecoration(labelText: "締切日"),
-      initialValue: _newTodo!.dueDate ?? DateTime.now(),
+  // Widget _dueDateTimeFormField() => DateTimeField(
+  //     format: _format,
+  //     decoration: InputDecoration(labelText: "締切日"),
+  //     initialValue: _newTodo!.dueDate ?? DateTime.now(),
 
-      // onChanged: _setDueDate,
-      onShowPicker: (context, currentValue) async {
-        final date = await showDatePicker(
-            context: context,
-            firstDate: DateTime(2000),
-            initialDate: currentValue ?? DateTime.now(),
-            lastDate: DateTime(2100));
-        if (date != null) {
-          final time = await showTimePicker(
-            context: context,
-            initialTime: TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
-          );
-          return DateTimeField.combine(date, time);
-        } else {
-          return currentValue;
-        }
-      });
+  //     // onChanged: _setDueDate,
+  //     onShowPicker: (context, currentValue) async {
+  //       final date = await showDatePicker(
+  //           context: context,
+  //           firstDate: DateTime(2000),
+  //           initialDate: currentValue ?? DateTime.now(),
+  //           lastDate: DateTime(2100));
+  //       if (date != null) {
+  //         final time = await showTimePicker(
+  //           context: context,
+  //           initialTime: TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
+  //         );
+  //         return DateTimeField.combine(date, time);
+  //       } else {
+  //         return currentValue;
+  //       }
+  //     });
 
-  void _setDueDate(DateTime dt) {
-    _newTodo!.dueDate = dt;
-  }
+  // void _setDueDate(DateTime dt) {
+  //   _newTodo!.dueDate = dt;
+  // }
 
-  Widget _noteTextFormField() => TextFormField(
-        decoration: InputDecoration(labelText: "メモ"),
-        initialValue: _newTodo!.note,
-        maxLines: 3,
-        onChanged: _setNote,
-      );
+  // Widget _noteTextFormField() => TextFormField(
+  //       decoration: InputDecoration(labelText: "メモ"),
+  //       initialValue: _newTodo!.note,
+  //       maxLines: 3,
+  //       onChanged: _setNote,
+  //     );
 
-  void _setNote(String note) {
-    _newTodo!.note = note;
-    //_newTodo!.check = note;
-  }
+  // void _setNote(String note) {
+  //   _newTodo!.note = note;
+  //   //_newTodo!.check = note;
+  // }
 }
