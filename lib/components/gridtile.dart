@@ -69,142 +69,169 @@ class _GridTilesState extends State<GridTiles>
   @override
   Widget build(BuildContext context) {
     if (widget.pretodo.tag == 'Todo' && widget.type == 0) {
-      Future.delayed(new Duration(milliseconds: 180 * widget.index))
+      Future.delayed(new Duration(milliseconds: 50 * widget.index))
           .then((value) => _animationController!.forward());
     } else {
       if (widget.pretodo.model == 0) {
         //レイヤー型
-        Future.delayed(new Duration(milliseconds: 180 * widget.index))
+        Future.delayed(new Duration(milliseconds: 50 * widget.index))
             .then((value) => _animationController!.forward());
       }
       if (widget.pretodo.model == 1) {
         Future.delayed(
-                new Duration(milliseconds: 180 * (widget.index - 4).abs()))
+                new Duration(milliseconds: 50 * (widget.index - 4).abs()))
             .then((value) => _animationController!.forward());
       }
+    }
+
+    _cardColor() {
+      if (widget.todo.id == widget.pretodo.id && widget.type != 0) {
+        return Colors.blue[300];
+      }
+      if (widget.todo.checker == 1) {
+        return Colors.green[300];
+      } else {
+        return Colors.white;
+      }
+    }
+
+    _textColor() {
+      if (widget.todo.id == widget.pretodo.id && widget.type != 0) {
+        return Colors.white;
+      }
+      if (widget.todo.checker == 1) {
+        return Colors.white;
+      } else {
+        return Colors.black;
+      }
+    }
+
+    Widget _CardWidget(TodoData model, TodoBloc _bloc) {
+      return Hero(
+        tag: 'tag' + widget.todo.id!,
+        child: new Card(
+          color: _cardColor(),
+          child: new InkWell(
+            onDoubleTap: () async {
+              print(widget.todo.number);
+              print(widget.todo.tag);
+
+              if (widget.todo.title!.isEmpty) {
+                showModalBottomSheet(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(20.0),
+                            topLeft: Radius.circular(20.0))),
+                    backgroundColor: Colors.white,
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return TodoEditView(
+                        number: widget.todo.number,
+                        //todoList: todos,
+                        todoBloc: _bloc,
+                        todo: widget.todo,
+                        label: widget.todo.tag,
+                        alltodos: widget.alltodos,
+                        isCenter: widget.todo.id == widget.pretodo.id &&
+                                widget.type != 0
+                            ? true
+                            : false,
+                      );
+                    });
+              } else {
+                if (widget.type == 0) {
+                  model.updateTodo(widget.todo);
+                  model.updatePreTodo(widget.pretodo);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MandalaGridScreen(
+                        // todo: todo,
+                        layer: 1, bloc: _bloc,
+                        //問題をtitleかtagsで分けるため
+                      ),
+                    ),
+                  );
+
+                  model.notify();
+                  // }
+                } else {
+                  if (widget.todo.id == widget.pretodo.id) {
+                    if (widget.todo.tag == 'Todo') {
+                      Navigator.pop(context);
+                    } else {
+                      print('korekore');
+
+                      model.updateTodo(widget.alltodos
+                          .where((element) =>
+                              element.id ==
+                              widget.todo.tag!.substring(
+                                  widget.todo.tag!.length - 36,
+                                  widget.todo.tag!.length))
+                          .toList()
+                          .cast<Todo>()
+                          .first);
+                      //model.updatePreTodo(widget.pretodo);
+                      model.notify();
+                    }
+                  } else {
+                    model.updatePreTodo(widget.pretodo);
+                    model.updateTodo(widget.todo);
+                    model.notify();
+                  }
+                }
+              }
+
+              // }
+            },
+            onTap: () {
+              showModalBottomSheet(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(20.0),
+                          topLeft: Radius.circular(20.0))),
+                  backgroundColor: Colors.white,
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return TodoEditView(
+                      number: widget.todo.number,
+                      // todoList: todos,
+                      todoBloc: _bloc,
+                      todo: widget.todo,
+                      label: widget.todo.tag,
+                      alltodos: widget.alltodos,
+                      isCenter: widget.todo.id == widget.pretodo.id &&
+                              widget.type != 0
+                          ? true
+                          : false,
+                    );
+                  });
+              print(widget.todo.number);
+            },
+            child:
+                // Stack(
+                //   children: [
+                new Center(
+              child: new Padding(
+                padding: EdgeInsets.all(4.0),
+                child: new Text(
+                  widget.todo.title!,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: _textColor()),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     final _bloc = Provider.of<TodoBloc>(context, listen: false);
     return Consumer<TodoData>(builder: (context, model, child) {
       return FadeTransition(
-        opacity: _animationController!,
-        child: Hero(
-            tag: 'tag' + widget.todo.id!,
-            child: new Card(
-              color: widget.todo.id == widget.pretodo.id && widget.type != 0
-                  ? Colors.blue[300]
-                  : Colors.white,
-              child: new InkWell(
-                onDoubleTap: () async {
-                  print(widget.todo.number);
-                  print(widget.todo.tag);
-
-                  if (widget.todo.title!.isEmpty) {
-                    showModalBottomSheet(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(20.0),
-                                topLeft: Radius.circular(20.0))),
-                        backgroundColor: Colors.white,
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (context) {
-                          return TodoEditView(
-                            number: widget.todo.number,
-                            //todoList: todos,
-                            todoBloc: _bloc,
-                            todo: widget.todo,
-                            label: widget.todo.tag,
-                            alltodos: widget.alltodos,
-                          );
-                        });
-                  } else {
-                    if (widget.type == 0) {
-                      model.updateTodo(widget.todo);
-                      model.updatePreTodo(widget.pretodo);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => MandalaGridScreen(
-                            // todo: todo,
-                            layer: 1, bloc: _bloc,
-                            //問題をtitleかtagsで分けるため
-                          ),
-                        ),
-                      );
-                      model.notify();
-                      // }
-                    } else {
-                      if (widget.todo.id == widget.pretodo.id) {
-                        if (widget.todo.tag == 'Todo') {
-                          Navigator.pop(context);
-                        } else {
-                          print('korekore');
-
-                          model.updateTodo(widget.alltodos
-                              .where((element) =>
-                                  element.id ==
-                                  widget.todo.tag!.substring(
-                                      widget.todo.tag!.length - 36,
-                                      widget.todo.tag!.length))
-                              .toList()
-                              .cast<Todo>()
-                              .first);
-                          //model.updatePreTodo(widget.pretodo);
-                          model.notify();
-                        }
-                      } else {
-                        model.updatePreTodo(widget.pretodo);
-                        model.updateTodo(widget.todo);
-                        model.notify();
-                      }
-                    }
-                  }
-
-                  // }
-                },
-                onTap: () {
-                  showModalBottomSheet(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(20.0),
-                              topLeft: Radius.circular(20.0))),
-                      backgroundColor: Colors.white,
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (context) {
-                        return TodoEditView(
-                          number: widget.todo.number,
-                          // todoList: todos,
-                          todoBloc: _bloc,
-                          todo: widget.todo,
-                          label: widget.todo.tag,
-                          alltodos: widget.alltodos,
-                        );
-                      });
-                  print(widget.todo.number);
-                },
-                child:
-                    // Stack(
-                    //   children: [
-                    new Center(
-                  child: new Padding(
-                    padding: EdgeInsets.all(4.0),
-                    child: new Text(
-                      widget.todo.title!,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: widget.todo.id == widget.pretodo.id &&
-                                  widget.type != 0
-                              ? Colors.white
-                              : Colors.black),
-                    ),
-                  ),
-                ),
-              ),
-            )),
-      );
-      // }
+          opacity: _animationController!, child: _CardWidget(model, _bloc));
     });
   }
 }

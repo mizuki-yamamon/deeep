@@ -42,14 +42,14 @@ class MyApp extends StatelessWidget {
             ),
           ),
           // ダークモード対応
-          darkTheme: ThemeData(
-            primaryColor: Colors.black,
-            backgroundColor: Colors.black,
-            brightness: Brightness.dark,
-            iconTheme: const IconThemeData.fallback().copyWith(
-              color: Colors.white,
-            ),
-          ),
+          // darkTheme: ThemeData(
+          //   primaryColor: Colors.black,
+          //   backgroundColor: Colors.black,
+          //   brightness: Brightness.dark,
+          //   iconTheme: const IconThemeData.fallback().copyWith(
+          //     color: Colors.white,
+          //   ),
+          // ),
           themeMode: ThemeMode.system,
           home: TodoListView()),
     );

@@ -13,6 +13,7 @@ class TodoEditView extends StatefulWidget {
   final Todo? todo;
   final String? label;
   final List<Todo>? alltodos;
+  final bool? isCenter;
 
   TodoEditView({
     Key? key,
@@ -22,6 +23,7 @@ class TodoEditView extends StatefulWidget {
     @required this.todo,
     @required this.label,
     @required this.alltodos,
+    @required this.isCenter,
   }) {
     // Dartでは参照渡しが行われるため、todoをそのまま編集してしまうと、
     // 更新せずにリスト画面に戻ったときも値が更新されてしまうため、
@@ -44,6 +46,7 @@ class _TodoEditViewState extends State<TodoEditView> {
 
   Todo? _newTodo;
   bool _isCommenting = false;
+  bool _chack = false;
 //  int _type = 0;
   @override
   void initState() {
@@ -58,6 +61,7 @@ class _TodoEditViewState extends State<TodoEditView> {
           number: widget.number!,
           tag: widget.label!,
           model: widget.todo!.model!);
+      _chack = widget.todo!.checker == 0 ? false : true;
 
       // _newTodo!.id = widget.todo!.id!;
       // _newTodo!.title = widget.todo!.title!;
@@ -92,19 +96,35 @@ class _TodoEditViewState extends State<TodoEditView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                      onPressed: () {
-                        _delete();
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(Icons.delete)),
+                  widget.isCenter!
+                      ? Container()
+                      : IconButton(
+                          onPressed: () {
+                            _delete();
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(Icons.delete)),
                   // _confirmButton(context),
-                  widget.todo!.title!.isEmpty
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [_swichbutton(0), _swichbutton(1)],
-                        )
-                      : Container(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [_swichbutton(0), _swichbutton(1)],
+                  ),
+                  widget.isCenter!
+                      ? Container()
+                      : IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _newTodo!.checker =
+                                  _newTodo!.checker == 0 ? 1 : 0;
+                              widget.todoBloc!.update(_newTodo!);
+                            });
+                          },
+                          icon: Icon(
+                            Icons.check,
+                            color: _newTodo!.checker == 0
+                                ? Colors.grey
+                                : Colors.green,
+                          )),
                 ],
               ),
               Expanded(
@@ -117,13 +137,20 @@ class _TodoEditViewState extends State<TodoEditView> {
                               padding: const EdgeInsets.all(8.0),
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
-                                child: LinkTextAtoms(
-                                    text: _newTodo!.title,
-                                    textStyle: TextStyle(
-                                      fontFamily: 'font_1_honokamarugo_1.1',
-                                      fontSize: 15,
-                                      color: Colors.black,
-                                    )),
+                                child: _newTodo!.title!.isEmpty
+                                    ? Text('(Tap!)',
+                                        style: TextStyle(
+                                          fontFamily: 'font_1_honokamarugo_1.1',
+                                          fontSize: 15,
+                                          color: Colors.grey,
+                                        ))
+                                    : LinkTextAtoms(
+                                        text: _newTodo!.title,
+                                        textStyle: TextStyle(
+                                          fontFamily: 'font_1_honokamarugo_1.1',
+                                          fontSize: 15,
+                                          color: Colors.black,
+                                        )),
                                 // ),
                               ),
                             )
@@ -143,37 +170,21 @@ class _TodoEditViewState extends State<TodoEditView> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Container(),
                   IconButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
                       icon: Icon(Icons.keyboard_arrow_down)),
                   // _confirmButton(context),
-                  IconButton(
-                      onPressed: () {
-                        // setState(() {
-                        //   _isCommenting = !_isCommenting;
-                        // });
-                        if (_newTodo!.title!.isNotEmpty) {
-                          if (_newTodo!.id == null) {
-                            //新規作成
-                            // List<Todo> _mandalas = [];
-                            String _id = Uuid().v4();
-                            _newTodo!.id = _id;
-                            _newTodo!.tag = widget.label;
-                            widget.todoBloc!.create(
-                              _newTodo!,
-                            );
-                          } else {
-                            widget.todoBloc!.update(_newTodo!);
-                          }
-                        }
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(
-                        Icons.done,
-                        color: Colors.green,
-                      ))
+                  // IconButton(
+                  //     onPressed: () {
+                  //       _submit();
+                  //     },
+                  //     icon: Icon(
+                  //       Icons.done,
+                  //       color: Colors.green,
+                  //     ))
                 ],
               ),
             ],
@@ -201,6 +212,7 @@ class _TodoEditViewState extends State<TodoEditView> {
       onTap: () {
         setState(() {
           _newTodo!.model = type;
+          widget.todoBloc!.update(_newTodo!);
         });
       },
       child: Padding(
@@ -252,6 +264,25 @@ class _TodoEditViewState extends State<TodoEditView> {
 
   void _setTitle(String title) {
     _newTodo!.title = title;
+    widget.todoBloc!.update(_newTodo!);
+  }
+
+  _submit() {
+    // if (_newTodo!.title!.isNotEmpty) {
+    if (_newTodo!.id == null) {
+      //新規作成
+      // List<Todo> _mandalas = [];
+      String _id = Uuid().v4();
+      _newTodo!.id = _id;
+      _newTodo!.tag = widget.label;
+      widget.todoBloc!.create(
+        _newTodo!,
+      );
+    } else {
+      widget.todoBloc!.update(_newTodo!);
+    }
+    //}
+    Navigator.pop(context);
   }
 
   // Widget _dueDateTimeFormField() => DateTimeField(

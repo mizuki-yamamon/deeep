@@ -22,12 +22,13 @@ class Todo {
     @required this.model,
   });
   Todo.newTodo() {
+    id = Uuid().v4();
     title = "";
     dueDate = DateTime.now();
     note = "";
     checker = 0;
     number = 0;
-    tag = '';
+    tag = 'Todo';
     model = 1; //マンダラをデフォルトに
   }
 

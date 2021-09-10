@@ -7,8 +7,10 @@ import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderableitemsview/reorderableitemsview.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
 
 import '../search_screen.dart';
+import '../tutorial_screen.dart';
 
 class TodoListView extends StatefulWidget {
   @override
@@ -40,11 +42,17 @@ class _TodoListViewState extends State<TodoListView> {
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              // ListTile(
-              //   leading: Icon(Icons.help),
-              //   title: Text('How to use it'),
-              //   onTap: () => Navigator.of(context).pop(2),
-              // ),
+              ListTile(
+                  leading: Icon(Icons.help),
+                  title: Text('How to use it'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TutorialScreen(),
+                      ),
+                    ).then((value) => Navigator.pop(context));
+                  }),
               ListTile(
                 leading: Icon(Icons.support_agent),
                 title: Text('request'),
@@ -139,29 +147,41 @@ class _TodoListViewState extends State<TodoListView> {
                               color: Colors.blue[300],
                               child: new InkWell(
                                 onTap: () {
+                                  _bloc.create(Todo(
+                                    id: Uuid().v4(),
+                                    title: "",
+                                    dueDate: DateTime.now(),
+                                    note: "",
+                                    checker: 0,
+                                    number: _todoList[_todoList.length - 1]
+                                            .number! +
+                                        1,
+                                    tag: 'Todo',
+                                    model: 1, //マンダラをデフォルトに)
+                                  ));
                                   // _moveToCreateView(context, _bloc, _todoList);
-                                  showModalBottomSheet(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(20.0),
-                                              topLeft: Radius.circular(20.0))),
-                                      backgroundColor: Colors.white,
-                                      context: context,
-                                      isScrollControlled: true,
-                                      builder: (context) {
-                                        return TodoEditView(
-                                          number: _todoList.isEmpty
-                                              ? 0
-                                              : _todoList[_todoList.length - 1]
-                                                      .number! +
-                                                  1,
-                                          // todoList: _todoList,
-                                          todoBloc: _bloc,
-                                          todo: Todo.newTodo(),
-                                          label: 'Todo',
-                                          alltodos: snapshot.data!,
-                                        );
-                                      });
+                                  // showModalBottomSheet(
+                                  //     shape: RoundedRectangleBorder(
+                                  //         borderRadius: BorderRadius.only(
+                                  //             topRight: Radius.circular(20.0),
+                                  //             topLeft: Radius.circular(20.0))),
+                                  //     backgroundColor: Colors.white,
+                                  //     context: context,
+                                  //     isScrollControlled: true,
+                                  //     builder: (context) {
+                                  //       return TodoEditView(
+                                  //         number: _todoList.isEmpty
+                                  //             ? 0
+                                  //             : _todoList[_todoList.length - 1]
+                                  //                     .number! +
+                                  //                 1,
+                                  //         // todoList: _todoList,
+                                  //         todoBloc: _bloc,
+                                  //         todo: Todo.newTodo(),
+                                  //         label: 'Todo',
+                                  //         alltodos: snapshot.data!,
+                                  //       );
+                                  //     });
                                 },
                                 child: new Center(
                                   child: new Padding(
@@ -187,7 +207,9 @@ class _TodoListViewState extends State<TodoListView> {
                               await _bloc.update(
                                 _oldtodo,
                               );
-                              await _bloc.update(_newtodo);
+                              await _bloc.update(
+                                _newtodo,
+                              );
                             }),
                       ),
                     ],
@@ -210,13 +232,14 @@ class _TodoListViewState extends State<TodoListView> {
         .toList()
         .map(
           (index) => GridTiles(
-              Key(_todoList[index].id!),
-              _todoList[index],
-              _todoList[index],
-              index,
-              // _todoList,
-              _allTodos,
-              0),
+            Key(_todoList[index].id!),
+            _todoList[index],
+            _todoList[index],
+            index,
+            // _todoList,
+            _allTodos,
+            0,
+          ),
         )
         .toList();
   }

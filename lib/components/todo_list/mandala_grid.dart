@@ -1,5 +1,3 @@
-import 'package:deep/components/mandaraTile.dart';
-import 'package:deep/components/todo_edit/todo_edit_view.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/models/todo_data.dart';
 import 'package:deep/repositories/db_provider.dart';
@@ -101,7 +99,8 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     }
   }
 
-  _content(Todo _pretodo, List<Todo> _todoList, List<Todo> _allTodos) {
+  _content(Todo _centerTodo, List<Todo> _todoList, List<Todo> _allTodos,
+      Todo preTodo) {
     double width = MediaQuery.of(context).size.width;
 
     return _todoList
@@ -109,13 +108,13 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
         .keys
         .toList()
         .map((index) => GridTiles(
-            Key(_todoList[index].id!),
-            _todoList[index],
-            _pretodo,
-            index,
-            // _todoList,
-            _allTodos,
-            1))
+              Key(_todoList[index].id!),
+              _todoList[index],
+              _centerTodo,
+              index,
+              _allTodos,
+              1,
+            ))
         .toList();
   }
 
@@ -169,23 +168,22 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
       if (model.currentTodo!.model == 1) {
         _createTodo(model.currentTodo!);
       }
-      if (model.currentTodo!.model == 1) {
-        return StreamBuilder<List<Todo>>(
-            stream: _bloc.todoStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
-              if (snapshot.hasData) {
-                //_allList = snapshot.data!;
-                List<Todo> _todoList = snapshot.data!
-                    .where((element) =>
-                        element.tag ==
-                        model.currentTodo!.tag! + model.currentTodo!.id!)
-                    .toList();
-                Todo _centerTodo = snapshot.data!
-                    .where((element) => element.id == model.currentTodo!.id)
-                    .first;
 
-                if (_todoList.length > 4) {
+      return StreamBuilder<List<Todo>>(
+          stream: _bloc.todoStream,
+          builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
+            if (snapshot.hasData) {
+              //_allList = snapshot.data!;
+              List<Todo> _todoList = snapshot.data!
+                  .where((element) =>
+                      element.tag ==
+                      model.currentTodo!.tag! + model.currentTodo!.id!)
+                  .toList();
+              Todo _centerTodo = snapshot.data!
+                  .where((element) => element.id == model.currentTodo!.id)
+                  .first;
+              if (_centerTodo.model == 1) {
+                if (_todoList.length > 7) {
                   _todoList.sort((a, b) => a.number!.compareTo(b.number!));
                   _todoList.insert(4, _centerTodo);
                   return Scaffold(
@@ -206,8 +204,8 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                                 child: ReorderableItemsView(
                                   mainAxisSpacing: 0,
                                   children: [
-                                    ..._content(model.currentTodo!, _todoList,
-                                        snapshot.data!)
+                                    ..._content(_centerTodo, _todoList,
+                                        snapshot.data!, model.currentTodo!)
                                   ],
                                   crossAxisCount: 3,
                                   isGrid: true,
@@ -238,38 +236,17 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                             ],
                           )));
                 } else {
+                  _createTodo(_centerTodo);
                   return Scaffold(
                       backgroundColor: Colors.grey[100],
                       body: Center(child: CircularProgressIndicator()));
                 }
               } else {
-                return Scaffold(
-                    backgroundColor: Colors.grey[100],
-                    body: Center(child: CircularProgressIndicator()));
-              }
-            });
-      } else {
-        _listStaggeredLayerExtended = [
-          StaggeredTileExtended.count(1, 1),
-          StaggeredTileExtended.count(1, 1),
-          StaggeredTileExtended.count(1, 1)
-        ];
-        return StreamBuilder<List<Todo>>(
-            stream: _bloc.todoStream,
-            builder:
-                (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
-              if (snapshot.hasData) {
-                List<Todo> _todoList = snapshot.data!
-                    .where((element) =>
-                        element.tag ==
-                        (model.currentTodo!.tag! + model.currentTodo!.id!))
-                    .toList();
-                // _todoList.where((element) => element.tag == 'Todo').toList();
-                _todoList.sort((a, b) => a.number!.compareTo(b.number!));
-
-                Todo _centerTodo = snapshot.data!
-                    .where((element) => element.id == model.currentTodo!.id)
-                    .first;
+                _listStaggeredLayerExtended = [
+                  StaggeredTileExtended.count(1, 1),
+                  StaggeredTileExtended.count(1, 1),
+                  StaggeredTileExtended.count(1, 1),
+                ];
                 snapshot.data!
                     .where((element) =>
                         element.tag ==
@@ -280,6 +257,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                       .add(StaggeredTileExtended.count(1, 1));
                 });
                 _todoList.insert(0, _centerTodo);
+
                 return Scaffold(
                     backgroundColor: Colors.grey[100],
                     appBar: _appbarWidget(
@@ -293,37 +271,50 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                         Expanded(
                           child: ReorderableItemsView(
                             children: [
-                              ..._content(model.currentTodo!, _todoList,
-                                  snapshot.data!),
+                              ..._content(_centerTodo, _todoList,
+                                  snapshot.data!, model.currentTodo!),
                             ],
                             header: Card(
                               color: Colors.blue[300],
                               child: new InkWell(
                                 onTap: () {
+                                  _bloc.create(Todo(
+                                    id: Uuid().v4(),
+                                    title: "",
+                                    dueDate: DateTime.now(),
+                                    note: "",
+                                    checker: 0,
+                                    number: _todoList[_todoList.length - 1]
+                                            .number! +
+                                        1,
+                                    tag: _centerTodo.tag! + _centerTodo.id!,
+                                    model: 1, //マンダラをデフォルトに)
+                                  ));
                                   // _moveToCreateView(context, _bloc, _todoList);
-                                  showModalBottomSheet(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(20.0),
-                                              topLeft: Radius.circular(20.0))),
-                                      backgroundColor: Colors.white,
-                                      context: context,
-                                      isScrollControlled: true,
-                                      builder: (context) {
-                                        return TodoEditView(
-                                          number: _todoList.isEmpty
-                                              ? 0
-                                              : _todoList[_todoList.length - 1]
-                                                      .number! +
-                                                  1,
-                                          // todoList: _todoList,
-                                          todoBloc: _bloc,
-                                          todo: Todo.newTodo(),
-                                          label: model.currentTodo!.tag! +
-                                              model.currentTodo!.id!,
-                                          alltodos: snapshot.data!,
-                                        );
-                                      });
+                                  // showModalBottomSheet(
+                                  //     shape: RoundedRectangleBorder(
+                                  //         borderRadius: BorderRadius.only(
+                                  //             topRight: Radius.circular(20.0),
+                                  //             topLeft: Radius.circular(20.0))),
+                                  //     backgroundColor: Colors.white,
+                                  //     context: context,
+                                  //     isScrollControlled: true,
+                                  //     builder: (context) {
+                                  //       return TodoEditView(
+                                  //         number: _todoList.isEmpty
+                                  //             ? 0
+                                  //             : _todoList[_todoList.length - 1]
+                                  //                     .number! +
+                                  //                 1,
+                                  //         // todoList: _todoList,
+                                  //         todoBloc: _bloc,
+                                  //         todo: Todo.newTodo(),
+                                  //         label: model.currentTodo!.tag! +
+                                  //             model.currentTodo!.id!,
+                                  //         alltodos: snapshot.data!,
+                                  //         isCenter: ,
+                                  //       );
+                                  //     }).then((value) => print(value));
                                 },
                                 child: new Center(
                                   child: new Padding(
@@ -360,15 +351,138 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                         ),
                       ],
                     ));
-              } else {
-                return Scaffold(
-                    backgroundColor: Colors.grey[100],
-                    body: Center(child: CircularProgressIndicator()));
               }
-            });
-      }
+            } else {
+              return Scaffold(
+                  backgroundColor: Colors.grey[100],
+                  body: Center(child: CircularProgressIndicator()));
+            }
+          });
     });
   }
+  //     } else {
+  //       _listStaggeredLayerExtended = [
+  //         StaggeredTileExtended.count(1, 1),
+  //         StaggeredTileExtended.count(1, 1),
+  //         StaggeredTileExtended.count(1, 1)
+  //       ];
+  //       return StreamBuilder<List<Todo>>(
+  //           stream: _bloc.todoStream,
+  //           builder:
+  //               (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
+  //             if (snapshot.hasData) {
+  //               List<Todo> _todoList = snapshot.data!
+  //                   .where((element) =>
+  //                       element.tag ==
+  //                       (model.currentTodo!.tag! + model.currentTodo!.id!))
+  //                   .toList();
+  //               // _todoList.where((element) => element.tag == 'Todo').toList();
+  //               _todoList.sort((a, b) => a.number!.compareTo(b.number!));
+
+  //               Todo _centerTodo = snapshot.data!
+  //                   .where((element) => element.id == model.currentTodo!.id)
+  //                   .first;
+  //               snapshot.data!
+  //                   .where((element) =>
+  //                       element.tag ==
+  //                       (model.currentTodo!.tag! + model.currentTodo!.id!))
+  //                   .toList()
+  //                   .forEach((element) {
+  //                 _listStaggeredLayerExtended
+  //                     .add(StaggeredTileExtended.count(1, 1));
+  //               });
+  //               _todoList.insert(0, _centerTodo);
+  //               return Scaffold(
+  //                   backgroundColor: Colors.grey[100],
+  //                   appBar: _appbarWidget(
+  //                       model.currentTodo!, _bloc, snapshot.data!),
+  //                   body: Column(
+  //                     mainAxisSize: MainAxisSize.min,
+  //                     children: [
+  //                       SizedBox(
+  //                         height: 50,
+  //                       ),
+  //                       Expanded(
+  //                         child: ReorderableItemsView(
+  //                           children: [
+  //                             ..._content(model.currentTodo!, _todoList,
+  //                                 snapshot.data!),
+  //                           ],
+  //                           header: Card(
+  //                             color: Colors.blue[300],
+  //                             child: new InkWell(
+  //                               onTap: () {
+  //                                 _bloc.create(Todo.newTodo());
+  //                                 // _moveToCreateView(context, _bloc, _todoList);
+  //                                 // showModalBottomSheet(
+  //                                 //     shape: RoundedRectangleBorder(
+  //                                 //         borderRadius: BorderRadius.only(
+  //                                 //             topRight: Radius.circular(20.0),
+  //                                 //             topLeft: Radius.circular(20.0))),
+  //                                 //     backgroundColor: Colors.white,
+  //                                 //     context: context,
+  //                                 //     isScrollControlled: true,
+  //                                 //     builder: (context) {
+  //                                 //       return TodoEditView(
+  //                                 //         number: _todoList.isEmpty
+  //                                 //             ? 0
+  //                                 //             : _todoList[_todoList.length - 1]
+  //                                 //                     .number! +
+  //                                 //                 1,
+  //                                 //         // todoList: _todoList,
+  //                                 //         todoBloc: _bloc,
+  //                                 //         todo: Todo.newTodo(),
+  //                                 //         label: model.currentTodo!.tag! +
+  //                                 //             model.currentTodo!.id!,
+  //                                 //         alltodos: snapshot.data!,
+  //                                 //         isCenter: ,
+  //                                 //       );
+  //                                 //     }).then((value) => print(value));
+  //                               },
+  //                               child: new Center(
+  //                                 child: new Padding(
+  //                                     padding: EdgeInsets.all(4.0),
+  //                                     child: Icon(
+  //                                       Icons.add,
+  //                                       color: Colors.white,
+  //                                     )),
+  //                               ),
+  //                             ),
+  //                           ),
+  //                           crossAxisCount: 3,
+  //                           isGrid: true,
+  //                           staggeredTiles: _listStaggeredLayerExtended,
+  //                           longPressToDrag: true,
+  //                           onReorder: (int oldIndex, int newIndex) async {
+  //                             if (oldIndex == 0) {
+  //                               ShowFlushbar.showFloatingFlushbar(
+  //                                   context, 'エラー', '親のセルは動かすことができません');
+  //                             } else {
+  //                               Todo _oldtodo = _todoList[oldIndex];
+  //                               Todo _newtodo = _todoList[newIndex];
+  //                               int _old = _oldtodo.number!;
+  //                               int _new = _newtodo.number!;
+  //                               _oldtodo.number = _new;
+  //                               _newtodo.number = _old;
+  //                               await _bloc.update(
+  //                                 _oldtodo,
+  //                               );
+  //                               await _bloc.update(_newtodo);
+  //                             }
+  //                           },
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ));
+  //             } else {
+  //               return Scaffold(
+  //                   backgroundColor: Colors.grey[100],
+  //                   body: Center(child: CircularProgressIndicator()));
+  //             }
+  //           });
+  //     }
+  //   });
+  //}
 }
 
 //
