@@ -1,3 +1,4 @@
+import 'package:deep/components/todo_edit/todo_edit_view.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/models/todo_data.dart';
 import 'package:deep/repositories/db_provider.dart';
@@ -73,29 +74,25 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
 //マンダラグリットがない時に生成
   _createTodo(Todo todo) async {
     print('object');
-    List<Todo> thelist = await DBProvider.db.getAllTodos();
-    thelist.where((element) => (todo.tag! + todo.id!) == element.tag).toList();
-    print(thelist);
-    print(thelist
+    List<Todo> alllist = await DBProvider.db.getAllTodos();
+    List<Todo> thelist = alllist
         .where((element) => (todo.tag! + todo.id!) == element.tag)
-        .toList());
-    for (int i = thelist
-            .where((element) => (todo.tag! + todo.id!) == element.tag)
-            .toList()
-            .length;
-        i <= 7;
-        i++) {
-      widget.bloc.create(
-        Todo(
+        .toList();
+    print(alllist);
+    print(thelist);
+    for (int i = thelist.length; i <= 7; i++) {
+      Future.delayed(new Duration(milliseconds: 50)).then((value) {
+        widget.bloc.create(Todo(
             id: Uuid().v4(),
             title: '',
             note: '',
             dueDate: DateTime.now(),
             checker: 0,
-            number: i,
+            number: thelist[i - 1].number! + 1,
             tag: todo.tag! + todo.id!,
-            model: 1),
-      );
+            model: 1));
+        print(i);
+      });
     }
   }
 
@@ -122,11 +119,15 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     return AppBar(
       backgroundColor: Colors.grey[100],
       centerTitle: true,
-      title: Text(
-        todo.tag == 'Todo'
-            ? ('1層')
-            : (((todo.tag!.length - 4) / 36) + 1).toStringAsFixed(0) + '層',
-        style: TextStyle(color: Colors.black),
+      // title: Text(
+      //   todo.tag == 'Todo'
+      //       ? ('1層')
+      //       : (((todo.tag!.length - 4) / 36) + 1).toStringAsFixed(0) + '層',
+      //   style: TextStyle(color: Colors.black),
+      // ),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [_swichbutton(todo, 0, _bloc), _swichbutton(todo, 1, _bloc)],
       ),
       elevation: 0.0,
       leading: IconButton(
@@ -154,6 +155,57 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     );
   }
 
+  Widget _swichbutton(Todo todo, int type, TodoBloc _bloc) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          todo.model = type;
+          _bloc.update(todo);
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          padding: const EdgeInsets.all(5.0),
+          height: 40,
+          decoration: BoxDecoration(
+            border: Border.all(
+                color: (type == 0 && todo.model == 0) ||
+                        (type == 1 && todo.model == 1)
+                    ? Colors.blue
+                    : Colors.grey),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: type == 0
+                  ? [
+                      Icon(
+                        Icons.layers,
+                        color: (todo.model == 0) ? Colors.blue : Colors.grey,
+                      ),
+                      // Text("レイヤー",
+                      //     style: TextStyle(
+                      //         color: (todo.model == 0)
+                      //             ? Colors.blue
+                      //             : Colors.grey)),
+                    ]
+                  : [
+                      Icon(
+                        Icons.apps,
+                        color: (todo.model == 1) ? Colors.blue : Colors.grey,
+                      ),
+                      // Text("マンダラ",
+                      //     style: TextStyle(
+                      //         color: (todo.model == 1)
+                      //             ? Colors.blue
+                      //             : Colors.grey)),
+                    ]),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -165,9 +217,9 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     return Consumer<TodoData>(builder: (context, model, child) {
       print(model.currentTodo!.id);
       print('model.currentTodo!.id');
-      if (model.currentTodo!.model == 1) {
-        _createTodo(model.currentTodo!);
-      }
+      // if (model.currentTodo!.model == 1) {
+      //   _createTodo(model.currentTodo!);
+      // }
 
       return StreamBuilder<List<Todo>>(
           stream: _bloc.todoStream,
@@ -183,7 +235,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                   .where((element) => element.id == model.currentTodo!.id)
                   .first;
               if (_centerTodo.model == 1) {
-                if (_todoList.length > 7) {
+                if (_todoList.length >= 8) {
                   _todoList.sort((a, b) => a.number!.compareTo(b.number!));
                   _todoList.insert(4, _centerTodo);
                   return Scaffold(
@@ -247,6 +299,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                   StaggeredTileExtended.count(1, 1),
                   StaggeredTileExtended.count(1, 1),
                 ];
+
                 snapshot.data!
                     .where((element) =>
                         element.tag ==
@@ -256,6 +309,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                   _listStaggeredLayerExtended
                       .add(StaggeredTileExtended.count(1, 1));
                 });
+                _todoList.sort((a, b) => a.number!.compareTo(b.number!));
                 _todoList.insert(0, _centerTodo);
 
                 return Scaffold(
@@ -278,43 +332,53 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                               color: Colors.blue[300],
                               child: new InkWell(
                                 onTap: () {
-                                  _bloc.create(Todo(
+                                  // _bloc.create(Todo(
+                                  //   id: Uuid().v4(),
+                                  //   title: "",
+                                  //   dueDate: DateTime.now(),
+                                  //   note: "",
+                                  //   checker: 0,
+                                  //   number: _todoList[_todoList.length - 1]
+                                  //           .number! +
+                                  //       1,
+                                  //   tag: _centerTodo.tag! + _centerTodo.id!,
+                                  //   model: 1, //マンダラをデフォルトに)
+                                  // ));
+                                  Todo createTodo = Todo(
                                     id: Uuid().v4(),
                                     title: "",
                                     dueDate: DateTime.now(),
                                     note: "",
                                     checker: 0,
-                                    number: _todoList[_todoList.length - 1]
-                                            .number! +
-                                        1,
+                                    number: _todoList.isEmpty
+                                        ? 0
+                                        : _todoList[_todoList.length - 1]
+                                                .number! +
+                                            1,
                                     tag: _centerTodo.tag! + _centerTodo.id!,
                                     model: 1, //マンダラをデフォルトに)
-                                  ));
+                                  );
+                                  _bloc.create(createTodo);
                                   // _moveToCreateView(context, _bloc, _todoList);
-                                  // showModalBottomSheet(
-                                  //     shape: RoundedRectangleBorder(
-                                  //         borderRadius: BorderRadius.only(
-                                  //             topRight: Radius.circular(20.0),
-                                  //             topLeft: Radius.circular(20.0))),
-                                  //     backgroundColor: Colors.white,
-                                  //     context: context,
-                                  //     isScrollControlled: true,
-                                  //     builder: (context) {
-                                  //       return TodoEditView(
-                                  //         number: _todoList.isEmpty
-                                  //             ? 0
-                                  //             : _todoList[_todoList.length - 1]
-                                  //                     .number! +
-                                  //                 1,
-                                  //         // todoList: _todoList,
-                                  //         todoBloc: _bloc,
-                                  //         todo: Todo.newTodo(),
-                                  //         label: model.currentTodo!.tag! +
-                                  //             model.currentTodo!.id!,
-                                  //         alltodos: snapshot.data!,
-                                  //         isCenter: ,
-                                  //       );
-                                  //     }).then((value) => print(value));
+                                  showModalBottomSheet(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20.0),
+                                              topLeft: Radius.circular(20.0))),
+                                      backgroundColor: Colors.white,
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (context) {
+                                        return TodoEditView(
+                                          // number: number
+                                          // todoList: _todoList,
+                                          todoBloc: _bloc,
+                                          todo: createTodo,
+
+                                          alltodos: snapshot.data!,
+                                          isCenter: false,
+                                        );
+                                      });
                                 },
                                 child: new Center(
                                   child: new Padding(
@@ -344,7 +408,9 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                                 await _bloc.update(
                                   _oldtodo,
                                 );
-                                await _bloc.update(_newtodo);
+                                await _bloc.update(
+                                  _newtodo,
+                                );
                               }
                             },
                           ),

@@ -127,11 +127,10 @@ class _GridTilesState extends State<GridTiles>
                     isScrollControlled: true,
                     builder: (context) {
                       return TodoEditView(
-                        number: widget.todo.number,
                         //todoList: todos,
                         todoBloc: _bloc,
                         todo: widget.todo,
-                        label: widget.todo.tag,
+
                         alltodos: widget.alltodos,
                         isCenter: widget.todo.id == widget.pretodo.id &&
                                 widget.type != 0
@@ -161,8 +160,6 @@ class _GridTilesState extends State<GridTiles>
                     if (widget.todo.tag == 'Todo') {
                       Navigator.pop(context);
                     } else {
-                      print('korekore');
-
                       model.updateTodo(widget.alltodos
                           .where((element) =>
                               element.id ==
@@ -196,11 +193,10 @@ class _GridTilesState extends State<GridTiles>
                   isScrollControlled: true,
                   builder: (context) {
                     return TodoEditView(
-                      number: widget.todo.number,
                       // todoList: todos,
                       todoBloc: _bloc,
                       todo: widget.todo,
-                      label: widget.todo.tag,
+
                       alltodos: widget.alltodos,
                       isCenter: widget.todo.id == widget.pretodo.id &&
                               widget.type != 0

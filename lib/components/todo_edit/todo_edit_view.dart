@@ -7,21 +7,20 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class TodoEditView extends StatefulWidget {
-  final int? number;
-
+  // final int? number;
   final TodoBloc? todoBloc;
   final Todo? todo;
-  final String? label;
+  //final String? label;
   final List<Todo>? alltodos;
   final bool? isCenter;
 
   TodoEditView({
     Key? key,
     // @required this.todoList,
-    @required this.number,
+    //  @required this.number,
     @required this.todoBloc,
     @required this.todo,
-    @required this.label,
+    // @required this.label,
     @required this.alltodos,
     @required this.isCenter,
   }) {
@@ -58,8 +57,8 @@ class _TodoEditViewState extends State<TodoEditView> {
           dueDate: widget.todo!.dueDate!,
           note: widget.todo!.note!,
           checker: widget.todo!.checker!,
-          number: widget.number!,
-          tag: widget.label!,
+          number: widget.todo!.number,
+          tag: widget.todo!.tag,
           model: widget.todo!.model!);
       _chack = widget.todo!.checker == 0 ? false : true;
 
@@ -274,7 +273,7 @@ class _TodoEditViewState extends State<TodoEditView> {
       // List<Todo> _mandalas = [];
       String _id = Uuid().v4();
       _newTodo!.id = _id;
-      _newTodo!.tag = widget.label;
+      //_newTodo!.tag = widget.;
       widget.todoBloc!.create(
         _newTodo!,
       );

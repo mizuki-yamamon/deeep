@@ -147,41 +147,47 @@ class _TodoListViewState extends State<TodoListView> {
                               color: Colors.blue[300],
                               child: new InkWell(
                                 onTap: () {
-                                  _bloc.create(Todo(
+                                  Todo createTodo = Todo(
                                     id: Uuid().v4(),
                                     title: "",
                                     dueDate: DateTime.now(),
                                     note: "",
                                     checker: 0,
-                                    number: _todoList[_todoList.length - 1]
-                                            .number! +
-                                        1,
+                                    number: snapshot.data!
+                                            .where((element) =>
+                                                element.tag == 'Todo')
+                                            .toList()
+                                            .isEmpty
+                                        ? 0
+                                        : snapshot.data!
+                                                .where((element) =>
+                                                    element.tag == 'Todo')
+                                                .toList()[_todoList.length - 1]
+                                                .number! +
+                                            1,
                                     tag: 'Todo',
                                     model: 1, //マンダラをデフォルトに)
-                                  ));
+                                  );
+                                  _bloc.create(createTodo);
                                   // _moveToCreateView(context, _bloc, _todoList);
-                                  // showModalBottomSheet(
-                                  //     shape: RoundedRectangleBorder(
-                                  //         borderRadius: BorderRadius.only(
-                                  //             topRight: Radius.circular(20.0),
-                                  //             topLeft: Radius.circular(20.0))),
-                                  //     backgroundColor: Colors.white,
-                                  //     context: context,
-                                  //     isScrollControlled: true,
-                                  //     builder: (context) {
-                                  //       return TodoEditView(
-                                  //         number: _todoList.isEmpty
-                                  //             ? 0
-                                  //             : _todoList[_todoList.length - 1]
-                                  //                     .number! +
-                                  //                 1,
-                                  //         // todoList: _todoList,
-                                  //         todoBloc: _bloc,
-                                  //         todo: Todo.newTodo(),
-                                  //         label: 'Todo',
-                                  //         alltodos: snapshot.data!,
-                                  //       );
-                                  //     });
+                                  showModalBottomSheet(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20.0),
+                                              topLeft: Radius.circular(20.0))),
+                                      backgroundColor: Colors.white,
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (context) {
+                                        return TodoEditView(
+                                          // todoList: _todoList,
+                                          todoBloc: _bloc,
+                                          todo: createTodo,
+
+                                          alltodos: snapshot.data!,
+                                          isCenter: false,
+                                        );
+                                      });
                                 },
                                 child: new Center(
                                   child: new Padding(
