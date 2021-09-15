@@ -79,7 +79,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
         .where((element) => (todo.tag! + todo.id!) == element.tag)
         .toList();
     print(alllist);
-    print(thelist);
+    print(thelist.length);
     for (int i = thelist.length; i <= 7; i++) {
       Future.delayed(new Duration(milliseconds: 50)).then((value) {
         widget.bloc.create(Todo(
@@ -88,7 +88,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
             note: '',
             dueDate: DateTime.now(),
             checker: 0,
-            number: thelist[i - 1].number! + 1,
+            number: i == 0 ? 0 : thelist[i - 1].number! + 1,
             tag: todo.tag! + todo.id!,
             model: 1));
         print(i);
@@ -235,7 +235,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                   .where((element) => element.id == model.currentTodo!.id)
                   .first;
               if (_centerTodo.model == 1) {
-                if (_todoList.length >= 8) {
+                if (_todoList.length > 7) {
                   _todoList.sort((a, b) => a.number!.compareTo(b.number!));
                   _todoList.insert(4, _centerTodo);
                   return Scaffold(

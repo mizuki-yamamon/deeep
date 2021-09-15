@@ -106,7 +106,7 @@ class _GridTilesState extends State<GridTiles>
       }
     }
 
-    Widget _CardWidget(TodoData model, TodoBloc _bloc) {
+    Widget _cardWidget(TodoData model, TodoBloc _bloc) {
       return Hero(
         tag: 'tag' + widget.todo.id!,
         child: new Card(
@@ -207,8 +207,8 @@ class _GridTilesState extends State<GridTiles>
               print(widget.todo.number);
             },
             child:
-                // Stack(
-                //   children: [
+                //   Stack(
+                // children: [
                 new Center(
               child: new Padding(
                 padding: EdgeInsets.all(4.0),
@@ -219,6 +219,27 @@ class _GridTilesState extends State<GridTiles>
                 ),
               ),
             ),
+            // Positioned(
+            //   right: 1,
+            //   bottom: 1,
+            //   child: ClipOval(
+            //     child: Material(
+            //       color: Colors.white.withOpacity(0.9), // Button color
+            //       child: InkWell(
+            //           splashColor: Colors.blue, // Splash color
+            //           onTap: () {/},
+            //           child: Padding(
+            //             padding: const EdgeInsets.all(4.0),
+            //             child: Icon(
+            //               Icons.edit,
+            //               color: Colors.black,
+            //             ),
+            //           )),
+            //     ),
+            //   ),
+            // )
+            //   ],
+            // ),
           ),
         ),
       );
@@ -227,7 +248,7 @@ class _GridTilesState extends State<GridTiles>
     final _bloc = Provider.of<TodoBloc>(context, listen: false);
     return Consumer<TodoData>(builder: (context, model, child) {
       return FadeTransition(
-          opacity: _animationController!, child: _CardWidget(model, _bloc));
+          opacity: _animationController!, child: _cardWidget(model, _bloc));
     });
   }
 }

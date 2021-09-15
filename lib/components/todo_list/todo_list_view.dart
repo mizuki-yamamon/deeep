@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderableitemsview/reorderableitemsview.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
@@ -29,6 +30,23 @@ class _TodoListViewState extends State<TodoListView> {
     // TODO: implement initState
     super.initState();
     _getPackageInfo();
+    syncDataWithProvider();
+  }
+
+  Future syncDataWithProvider() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var result = prefs.getBool('FirstTime');
+    if (result != null) {
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => TutorialScreen(),
+        ),
+      );
+      prefs.setBool('FirstTime', true);
+      setState(() {});
+    }
   }
 
   _getPackageInfo() async {
