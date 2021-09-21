@@ -183,63 +183,154 @@ class _GridTilesState extends State<GridTiles>
               // }
             },
             onTap: () {
-              showModalBottomSheet(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(20.0),
-                          topLeft: Radius.circular(20.0))),
-                  backgroundColor: Colors.white,
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (context) {
-                    return TodoEditView(
-                      // todoList: todos,
-                      todoBloc: _bloc,
-                      todo: widget.todo,
-
-                      alltodos: widget.alltodos,
-                      isCenter: widget.todo.id == widget.pretodo.id &&
-                              widget.type != 0
-                          ? true
-                          : false,
-                    );
-                  });
               print(widget.todo.number);
+              print(widget.todo.tag);
+
+              if (widget.todo.title!.isEmpty) {
+                showModalBottomSheet(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(20.0),
+                            topLeft: Radius.circular(20.0))),
+                    backgroundColor: Colors.white,
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) {
+                      return TodoEditView(
+                        //todoList: todos,
+                        todoBloc: _bloc,
+                        todo: widget.todo,
+
+                        alltodos: widget.alltodos,
+                        isCenter: widget.todo.id == widget.pretodo.id &&
+                                widget.type != 0
+                            ? true
+                            : false,
+                      );
+                    });
+              } else {
+                if (widget.type == 0) {
+                  model.updateTodo(widget.todo);
+                  model.updatePreTodo(widget.pretodo);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MandalaGridScreen(
+                        // todo: todo,
+                        layer: 1, bloc: _bloc,
+                        //問題をtitleかtagsで分けるため
+                      ),
+                    ),
+                  );
+                  model.notify();
+                  // }
+                } else {
+                  if (widget.todo.id == widget.pretodo.id) {
+                    if (widget.todo.tag == 'Todo') {
+                      Navigator.pop(context);
+                    } else {
+                      model.updateTodo(widget.alltodos
+                          .where((element) =>
+                              element.id ==
+                              widget.todo.tag!.substring(
+                                  widget.todo.tag!.length - 36,
+                                  widget.todo.tag!.length))
+                          .toList()
+                          .cast<Todo>()
+                          .first);
+
+                      //model.updatePreTodo(widget.pretodo);
+                      model.notify();
+                    }
+                  } else {
+                    model.updatePreTodo(widget.pretodo);
+                    model.updateTodo(widget.todo);
+                    model.notify();
+                  }
+                }
+              }
+              // showModalBottomSheet(
+              //     shape: RoundedRectangleBorder(
+              //         borderRadius: BorderRadius.only(
+              //             topRight: Radius.circular(20.0),
+              //             topLeft: Radius.circular(20.0))),
+              //     backgroundColor: Colors.white,
+              //     context: context,
+              //     isScrollControlled: true,
+              //     builder: (context) {
+              //       return TodoEditView(
+              //         // todoList: todos,
+              //         todoBloc: _bloc,
+              //         todo: widget.todo,
+
+              //         alltodos: widget.alltodos,
+              //         isCenter: widget.todo.id == widget.pretodo.id &&
+              //                 widget.type != 0
+              //             ? true
+              //             : false,
+              //       );
+              //     });
+              // print(widget.todo.number);
             },
-            child:
-                //   Stack(
-                // children: [
+            child: Stack(
+              children: [
                 new Center(
-              child: new Padding(
-                padding: EdgeInsets.all(4.0),
-                child: new Text(
-                  widget.todo.title!,
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: _textColor()),
+                  child: new Padding(
+                    padding: EdgeInsets.all(4.0),
+                    child: new Text(
+                      widget.todo.title!,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, color: _textColor()),
+                    ),
+                  ),
                 ),
-              ),
+                Positioned(
+                  right: 1,
+                  bottom: 1,
+                  child: ClipOval(
+                    child: Material(
+                      color: Colors.white.withOpacity(0.95), // Button color
+                      child: InkWell(
+                          splashColor: Colors.blue, // Splash color
+                          onTap: () {
+                            showModalBottomSheet(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20.0),
+                                        topLeft: Radius.circular(20.0))),
+                                backgroundColor: Colors.white,
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (context) {
+                                  return TodoEditView(
+                                    // todoList: todos,
+                                    todoBloc: _bloc,
+                                    todo: widget.todo,
+
+                                    alltodos: widget.alltodos,
+                                    isCenter:
+                                        widget.todo.id == widget.pretodo.id &&
+                                                widget.type != 0
+                                            ? true
+                                            : false,
+                                  );
+                                });
+                            print(widget.todo.number);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Icon(
+                              Icons.history_edu_outlined, //expand_less,
+                              size:
+                                  MediaQuery.of(context).size.width * 0.03 + 10,
+                              color: Colors.black26,
+                            ),
+                          )),
+                    ),
+                  ),
+                )
+              ],
             ),
-            // Positioned(
-            //   right: 1,
-            //   bottom: 1,
-            //   child: ClipOval(
-            //     child: Material(
-            //       color: Colors.white.withOpacity(0.9), // Button color
-            //       child: InkWell(
-            //           splashColor: Colors.blue, // Splash color
-            //           onTap: () {/},
-            //           child: Padding(
-            //             padding: const EdgeInsets.all(4.0),
-            //             child: Icon(
-            //               Icons.edit,
-            //               color: Colors.black,
-            //             ),
-            //           )),
-            //     ),
-            //   ),
-            // )
-            //   ],
-            // ),
           ),
         ),
       );

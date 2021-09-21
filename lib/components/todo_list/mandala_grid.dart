@@ -96,6 +96,21 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     }
   }
 
+  _deleteTodo(Todo todo) async {
+    print('object');
+    List<Todo> alllist = await DBProvider.db.getAllTodos();
+    List<Todo> thelist = alllist
+        .where((element) => (todo.tag! + todo.id!) == element.tag)
+        .toList();
+    print(alllist);
+    print(thelist.length);
+    thelist.forEach((element) {
+      if (element.title!.isEmpty) {
+        widget.bloc.delete(element.id!);
+      }
+    });
+  }
+
   _content(Todo _centerTodo, List<Todo> _todoList, List<Todo> _allTodos,
       Todo preTodo) {
     double width = MediaQuery.of(context).size.width;
@@ -115,7 +130,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
         .toList();
   }
 
-  _appbarWidget(Todo todo, TodoBloc _bloc, List<Todo> alltodo) {
+  _appbarWidget(Todo todo, TodoBloc _bloc, List<Todo> alltodo, TodoData model) {
     return AppBar(
       backgroundColor: Colors.grey[100],
       centerTitle: true,
@@ -132,10 +147,27 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
       elevation: 0.0,
       leading: IconButton(
           onPressed: () {
-            Navigator.popUntil(
-                context, (Route<dynamic> route) => route.isFirst);
+            if (todo.tag == 'Todo') {
+              Navigator.popUntil(
+                  context, (Route<dynamic> route) => route.isFirst);
+              // Navigator.pop(context);
+            } else {
+              model.updateTodo(alltodo
+                  .where((element) =>
+                      element.id ==
+                      todo.tag!
+                          .substring(todo.tag!.length - 36, todo.tag!.length))
+                  .toList()
+                  .cast<Todo>()
+                  .first);
+
+              //model.updatePreTodo(widget.pretodo);
+              model.notify();
+              // Navigator.popUntil(
+              //     context, (Route<dynamic> route) => route.isFirst);
+            }
           },
-          icon: Icon(Icons.fast_rewind, color: Colors.black)),
+          icon: Icon(Icons.arrow_back_ios, color: Colors.black)),
       actions: [
         IconButton(
             onPressed: () {
@@ -181,7 +213,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
               children: type == 0
                   ? [
                       Icon(
-                        Icons.layers,
+                        Icons.calendar_view_month,
                         color: (todo.model == 0) ? Colors.blue : Colors.grey,
                       ),
                       // Text("レイヤー",
@@ -241,7 +273,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                   return Scaffold(
                       backgroundColor: Colors.grey[100],
                       appBar: _appbarWidget(
-                          model.currentTodo!, _bloc, snapshot.data!),
+                          model.currentTodo!, _bloc, snapshot.data!, model),
                       body: Container(
                           width: width,
                           height: height,
@@ -294,6 +326,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                       body: Center(child: CircularProgressIndicator()));
                 }
               } else {
+                _deleteTodo(_centerTodo);
                 _listStaggeredLayerExtended = [
                   StaggeredTileExtended.count(1, 1),
                   StaggeredTileExtended.count(1, 1),
@@ -315,7 +348,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                 return Scaffold(
                     backgroundColor: Colors.grey[100],
                     appBar: _appbarWidget(
-                        model.currentTodo!, _bloc, snapshot.data!),
+                        model.currentTodo!, _bloc, snapshot.data!, model),
                     body: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [

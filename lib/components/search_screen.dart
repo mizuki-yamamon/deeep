@@ -33,7 +33,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (query.isNotEmpty) {
       List<Todo> dummyListData = [];
       dummySearchList.forEach((item) {
-        if (item.title!.contains(query)) {
+        if (item.title!.contains(query) && item.title!.isNotEmpty) {
           dummyListData.add(item);
         }
       });
@@ -90,34 +90,38 @@ class _SearchScreenState extends State<SearchScreen> {
                   shrinkWrap: true,
                   itemCount: items.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      tileColor: Colors.white,
-                      onTap: () {
-                        model.updateTodo(items[index]);
-                        model.updatePreTodo(items[index]);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => MandalaGridScreen(
-                              // todo: todo,
-                              layer: 1, bloc: _bloc,
-                              //問題をtitleかtagsで分けるため
+                    if (items[index].title!.isNotEmpty) {
+                      return ListTile(
+                        tileColor: Colors.white,
+                        onTap: () {
+                          model.updateTodo(items[index]);
+                          model.updatePreTodo(items[index]);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MandalaGridScreen(
+                                // todo: todo,
+                                layer: 1, bloc: _bloc,
+                                //問題をtitleかtagsで分けるため
+                              ),
                             ),
+                          );
+                          model.notify();
+                        },
+                        title: Text(
+                          '${items[index].title}',
+                          style: TextStyle(
+                            fontFamily: 'SFProDisplay',
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FontStyle.normal,
                           ),
-                        );
-                        model.notify();
-                      },
-                      title: Text(
-                        '${items[index].title}',
-                        style: TextStyle(
-                          fontFamily: 'SFProDisplay',
-                          fontWeight: FontWeight.bold,
-                          fontStyle: FontStyle.normal,
+                          textAlign: TextAlign.left,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        textAlign: TextAlign.left,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    );
+                      );
+                    } else {
+                      return Container();
+                    }
                   },
                 ),
               ),

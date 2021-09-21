@@ -108,22 +108,27 @@ class _TodoEditViewState extends State<TodoEditView> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [_swichbutton(0), _swichbutton(1)],
                   ),
-                  widget.isCenter!
-                      ? Container()
-                      : IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _newTodo!.checker =
-                                  _newTodo!.checker == 0 ? 1 : 0;
-                              widget.todoBloc!.update(_newTodo!);
-                            });
-                          },
-                          icon: Icon(
-                            Icons.check,
-                            color: _newTodo!.checker == 0
-                                ? Colors.grey
-                                : Colors.green,
-                          )),
+                  IconButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.keyboard_arrow_down)),
+                  // widget.isCenter!
+                  //     ? Container()
+                  //     : IconButton(
+                  //         onPressed: () {
+                  //           setState(() {
+                  //             _newTodo!.checker =
+                  //                 _newTodo!.checker == 0 ? 1 : 0;
+                  //             widget.todoBloc!.update(_newTodo!);
+                  //           });
+                  //         },
+                  //         icon: Icon(
+                  //           Icons.check,
+                  //           color: _newTodo!.checker == 0
+                  //               ? Colors.grey
+                  //               : Colors.green,
+                  //         )),
                 ],
               ),
               Expanded(
@@ -170,11 +175,11 @@ class _TodoEditViewState extends State<TodoEditView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(),
-                  IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(Icons.keyboard_arrow_down)),
+                  // IconButton(
+                  //     onPressed: () {
+                  //       Navigator.pop(context);
+                  //     },
+                  //     icon: Icon(Icons.keyboard_arrow_down)),
                   // _confirmButton(context),
                   // IconButton(
                   //     onPressed: () {
@@ -227,7 +232,7 @@ class _TodoEditViewState extends State<TodoEditView> {
               children: type == 0
                   ? [
                       Icon(
-                        Icons.layers,
+                        Icons.calendar_view_month,
                         color: _buttonColor(type),
                       ),
                       Text("レイヤー", style: TextStyle(color: _buttonColor(type))),
