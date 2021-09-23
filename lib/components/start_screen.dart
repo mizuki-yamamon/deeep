@@ -1,4 +1,5 @@
 import 'package:deep/components/gridtile.dart';
+import 'package:deep/components/map_screen.dart';
 import 'package:deep/components/todo_edit/todo_edit_view.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/repositories/todo_bloc.dart';
@@ -10,8 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 
-import '../search_screen.dart';
-import '../tutorial_screen.dart';
+import 'search_screen.dart';
+import 'tutorial_screen.dart';
 
 class TodoListView extends StatefulWidget {
   @override
@@ -35,16 +36,15 @@ class _TodoListViewState extends State<TodoListView> {
 
   Future syncDataWithProvider() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var result = prefs.getBool('FirstTime');
-    if (result != null) {
-    } else {
+    var result = prefs.getBool('FirstTime3');
+    if (result == null) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => TutorialScreen(),
         ),
       );
-      prefs.setBool('FirstTime', true);
+
       setState(() {});
     }
   }
@@ -129,6 +129,20 @@ class _TodoListViewState extends State<TodoListView> {
                         color: Colors.black,
                       )),
                   actions: [
+                    IconButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MapScreen(
+                                        bloc: _bloc,
+                                        alltodos: snapshot.data!,
+                                      )));
+                        },
+                        icon: Icon(
+                          Icons.map,
+                          color: Colors.black,
+                        )),
                     IconButton(
                         onPressed: () {
                           Navigator.push(

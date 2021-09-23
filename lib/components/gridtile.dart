@@ -88,9 +88,10 @@ class _GridTilesState extends State<GridTiles>
       if (widget.todo.id == widget.pretodo.id && widget.type != 0) {
         return Colors.blue[300];
       }
-      if (widget.todo.checker == 1) {
-        return Colors.green[300];
-      } else {
+      // if (widget.todo.checker == 1) {
+      //   return Colors.green[300];
+      // }
+      else {
         return Colors.white;
       }
     }

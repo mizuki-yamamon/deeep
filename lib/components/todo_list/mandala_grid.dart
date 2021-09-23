@@ -191,6 +191,9 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     return GestureDetector(
       onTap: () {
         setState(() {
+          if (type == 0) {
+            _deleteTodo(todo);
+          }
           todo.model = type;
           _bloc.update(todo);
         });
@@ -326,7 +329,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                       body: Center(child: CircularProgressIndicator()));
                 }
               } else {
-                _deleteTodo(_centerTodo);
+                // _deleteTodo(_centerTodo);
                 _listStaggeredLayerExtended = [
                   StaggeredTileExtended.count(1, 1),
                   StaggeredTileExtended.count(1, 1),
@@ -365,18 +368,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                               color: Colors.blue[300],
                               child: new InkWell(
                                 onTap: () {
-                                  // _bloc.create(Todo(
-                                  //   id: Uuid().v4(),
-                                  //   title: "",
-                                  //   dueDate: DateTime.now(),
-                                  //   note: "",
-                                  //   checker: 0,
-                                  //   number: _todoList[_todoList.length - 1]
-                                  //           .number! +
-                                  //       1,
-                                  //   tag: _centerTodo.tag! + _centerTodo.id!,
-                                  //   model: 1, //マンダラをデフォルトに)
-                                  // ));
+                                  print('OK');
                                   Todo createTodo = Todo(
                                     id: Uuid().v4(),
                                     title: "",

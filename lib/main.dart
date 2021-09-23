@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'components/todo_list/todo_list_view.dart';
+import 'components/start_screen.dart';
 import 'configs/const_text.dart';
 import 'models/todo_data.dart';
 

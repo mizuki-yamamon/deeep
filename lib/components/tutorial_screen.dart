@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TutorialScreen extends StatefulWidget {
   @override
@@ -155,8 +156,14 @@ class _TutorialScreenState extends State<TutorialScreen> {
                         onPrimary: Colors.black,
                         shape: const StadiumBorder(),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         print("早速はじめる！");
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        var result = prefs.getBool('FirstTime3');
+                        if (result == null) {
+                          prefs.setBool('FirstTime3', true);
+                        }
                         Navigator.pop(context);
                       },
                     ),
