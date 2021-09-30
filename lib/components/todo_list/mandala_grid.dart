@@ -11,6 +11,7 @@ import 'package:reorderableitemsview/reorderableitemsview.dart';
 import 'package:uuid/uuid.dart';
 
 import '../gridtile.dart';
+import '../map_screen.dart';
 import '../search_screen.dart';
 
 class MandalaGridScreen extends StatefulWidget {
@@ -169,6 +170,20 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
           },
           icon: Icon(Icons.arrow_back_ios, color: Colors.black)),
       actions: [
+        IconButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => MapScreen(
+                            bloc: _bloc,
+                            alltodos: alltodo,
+                          )));
+            },
+            icon: Icon(
+              Icons.map,
+              color: Colors.black,
+            )),
         IconButton(
             onPressed: () {
               Navigator.push(
