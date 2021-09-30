@@ -4,12 +4,10 @@ import 'package:deep/models/todo_data.dart';
 import 'package:deep/repositories/db_provider.dart';
 import 'package:deep/repositories/todo_bloc.dart';
 import 'package:deep/widgets/flushbar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reorderableitemsview/reorderableitemsview.dart';
 import 'package:uuid/uuid.dart';
-
 import '../gridtile.dart';
 import '../map_screen.dart';
 import '../search_screen.dart';
@@ -36,6 +34,9 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
   AnimationController? controller;
   List<Todo> _allList = [];
   Todo? _todo;
+  String _newId = '';
+  String _oldId = '';
+  bool _isAnime = false;
 
   // Tag? _centerTag;
 
@@ -112,22 +113,20 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     });
   }
 
-  _content(Todo _centerTodo, List<Todo> _todoList, List<Todo> _allTodos,
-      Todo preTodo) {
+  _content(
+    Todo _centerTodo,
+    List<Todo> _todoList,
+    List<Todo> _allTodos,
+    Todo preTodo,
+  ) {
     double width = MediaQuery.of(context).size.width;
 
     return _todoList
         .asMap()
         .keys
         .toList()
-        .map((index) => GridTiles(
-              Key(_todoList[index].id!),
-              _todoList[index],
-              _centerTodo,
-              index,
-              _allTodos,
-              1,
-            ))
+        .map((index) => GridTiles(Key(_todoList[index].id!), _todoList[index],
+            _centerTodo, index, _allTodos, 1))
         .toList();
   }
 
@@ -262,11 +261,21 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
     double height = MediaQuery.of(context).size.height;
     final _bloc = Provider.of<TodoBloc>(context, listen: false);
 
-    _todo = Provider.of<TodoData>(context, listen: false).currentTodo;
+    _todo = Provider.of<TodoData>(context).currentTodo;
 
     return Consumer<TodoData>(builder: (context, model, child) {
-      print(model.currentTodo!.id);
-      print('model.currentTodo!.id');
+      if (model.currentTodo != null) {
+        _newId = model.currentTodo!.id!;
+      } else {
+        _newId = '';
+      }
+      print('変更前');
+      print(_newId);
+      print(_oldId);
+      if (_newId != _oldId) {
+        _oldId = _newId;
+      }
+
       // if (model.currentTodo!.model == 1) {
       //   _createTodo(model.currentTodo!);
       // }
@@ -315,7 +324,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                                   longPressToDrag: true,
                                   onReorder:
                                       (int oldIndex, int newIndex) async {
-                                    if (oldIndex == 4) {
+                                    if (oldIndex == 4 || newIndex == 4) {
                                       ShowFlushbar.showFloatingFlushbar(
                                           context, 'エラー', '中心は動かすことができません');
                                     } else {
@@ -396,7 +405,7 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                                                 .number! +
                                             1,
                                     tag: _centerTodo.tag! + _centerTodo.id!,
-                                    model: 1, //マンダラをデフォルトに)
+                                    model: 0, //マンダラ:1
                                   );
                                   _bloc.create(createTodo);
                                   // _moveToCreateView(context, _bloc, _todoList);
@@ -435,7 +444,8 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
                             staggeredTiles: _listStaggeredLayerExtended,
                             longPressToDrag: true,
                             onReorder: (int oldIndex, int newIndex) async {
-                              if (oldIndex == 0) {
+                              if (oldIndex == 0 || newIndex == 0) {
+                                print('fff');
                                 ShowFlushbar.showFloatingFlushbar(
                                     context, 'エラー', '親のセルは動かすことができません');
                               } else {
@@ -466,129 +476,6 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
           });
     });
   }
-  //     } else {
-  //       _listStaggeredLayerExtended = [
-  //         StaggeredTileExtended.count(1, 1),
-  //         StaggeredTileExtended.count(1, 1),
-  //         StaggeredTileExtended.count(1, 1)
-  //       ];
-  //       return StreamBuilder<List<Todo>>(
-  //           stream: _bloc.todoStream,
-  //           builder:
-  //               (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
-  //             if (snapshot.hasData) {
-  //               List<Todo> _todoList = snapshot.data!
-  //                   .where((element) =>
-  //                       element.tag ==
-  //                       (model.currentTodo!.tag! + model.currentTodo!.id!))
-  //                   .toList();
-  //               // _todoList.where((element) => element.tag == 'Todo').toList();
-  //               _todoList.sort((a, b) => a.number!.compareTo(b.number!));
-
-  //               Todo _centerTodo = snapshot.data!
-  //                   .where((element) => element.id == model.currentTodo!.id)
-  //                   .first;
-  //               snapshot.data!
-  //                   .where((element) =>
-  //                       element.tag ==
-  //                       (model.currentTodo!.tag! + model.currentTodo!.id!))
-  //                   .toList()
-  //                   .forEach((element) {
-  //                 _listStaggeredLayerExtended
-  //                     .add(StaggeredTileExtended.count(1, 1));
-  //               });
-  //               _todoList.insert(0, _centerTodo);
-  //               return Scaffold(
-  //                   backgroundColor: Colors.grey[100],
-  //                   appBar: _appbarWidget(
-  //                       model.currentTodo!, _bloc, snapshot.data!),
-  //                   body: Column(
-  //                     mainAxisSize: MainAxisSize.min,
-  //                     children: [
-  //                       SizedBox(
-  //                         height: 50,
-  //                       ),
-  //                       Expanded(
-  //                         child: ReorderableItemsView(
-  //                           children: [
-  //                             ..._content(model.currentTodo!, _todoList,
-  //                                 snapshot.data!),
-  //                           ],
-  //                           header: Card(
-  //                             color: Colors.blue[300],
-  //                             child: new InkWell(
-  //                               onTap: () {
-  //                                 _bloc.create(Todo.newTodo());
-  //                                 // _moveToCreateView(context, _bloc, _todoList);
-  //                                 // showModalBottomSheet(
-  //                                 //     shape: RoundedRectangleBorder(
-  //                                 //         borderRadius: BorderRadius.only(
-  //                                 //             topRight: Radius.circular(20.0),
-  //                                 //             topLeft: Radius.circular(20.0))),
-  //                                 //     backgroundColor: Colors.white,
-  //                                 //     context: context,
-  //                                 //     isScrollControlled: true,
-  //                                 //     builder: (context) {
-  //                                 //       return TodoEditView(
-  //                                 //         number: _todoList.isEmpty
-  //                                 //             ? 0
-  //                                 //             : _todoList[_todoList.length - 1]
-  //                                 //                     .number! +
-  //                                 //                 1,
-  //                                 //         // todoList: _todoList,
-  //                                 //         todoBloc: _bloc,
-  //                                 //         todo: Todo.newTodo(),
-  //                                 //         label: model.currentTodo!.tag! +
-  //                                 //             model.currentTodo!.id!,
-  //                                 //         alltodos: snapshot.data!,
-  //                                 //         isCenter: ,
-  //                                 //       );
-  //                                 //     }).then((value) => print(value));
-  //                               },
-  //                               child: new Center(
-  //                                 child: new Padding(
-  //                                     padding: EdgeInsets.all(4.0),
-  //                                     child: Icon(
-  //                                       Icons.add,
-  //                                       color: Colors.white,
-  //                                     )),
-  //                               ),
-  //                             ),
-  //                           ),
-  //                           crossAxisCount: 3,
-  //                           isGrid: true,
-  //                           staggeredTiles: _listStaggeredLayerExtended,
-  //                           longPressToDrag: true,
-  //                           onReorder: (int oldIndex, int newIndex) async {
-  //                             if (oldIndex == 0) {
-  //                               ShowFlushbar.showFloatingFlushbar(
-  //                                   context, 'エラー', '親のセルは動かすことができません');
-  //                             } else {
-  //                               Todo _oldtodo = _todoList[oldIndex];
-  //                               Todo _newtodo = _todoList[newIndex];
-  //                               int _old = _oldtodo.number!;
-  //                               int _new = _newtodo.number!;
-  //                               _oldtodo.number = _new;
-  //                               _newtodo.number = _old;
-  //                               await _bloc.update(
-  //                                 _oldtodo,
-  //                               );
-  //                               await _bloc.update(_newtodo);
-  //                             }
-  //                           },
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ));
-  //             } else {
-  //               return Scaffold(
-  //                   backgroundColor: Colors.grey[100],
-  //                   body: Center(child: CircularProgressIndicator()));
-  //             }
-  //           });
-  //     }
-  //   });
-  //}
 }
 
 //

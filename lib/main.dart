@@ -2,10 +2,12 @@ import 'package:deep/repositories/db_provider.dart';
 import 'package:deep/repositories/todo_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'components/start_screen.dart';
 import 'configs/const_text.dart';
+import 'models/anime_data.dart';
 import 'models/todo_data.dart';
 
 void main() {
@@ -31,6 +33,14 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: [
+            const Locale("en", "US"),
+            const Locale("ja", "JP")
+          ],
           debugShowCheckedModeBanner: false,
           title: ConstText.appTitle,
           theme: ThemeData(

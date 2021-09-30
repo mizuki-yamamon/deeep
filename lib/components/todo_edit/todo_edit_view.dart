@@ -3,6 +3,7 @@ import 'package:deep/models/todo.dart';
 import 'package:deep/repositories/todo_bloc.dart';
 import 'package:deep/widgets/link_text.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
@@ -49,6 +50,7 @@ class _TodoEditViewState extends State<TodoEditView> {
 //  int _type = 0;
   @override
   void initState() {
+    initializeDateFormatting("ja_JP");
     print(widget.todo!.dueDate!);
     if (widget.todo!.id != null) {
       _newTodo = Todo(
@@ -104,10 +106,11 @@ class _TodoEditViewState extends State<TodoEditView> {
                           },
                           icon: Icon(Icons.delete)),
                   // _confirmButton(context),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [_swichbutton(0), _swichbutton(1)],
-                  ),
+
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  //   children: [_swichbutton(0), _swichbutton(1)],
+                  // ),
                   IconButton(
                       onPressed: () {
                         Navigator.pop(context);
@@ -175,6 +178,9 @@ class _TodoEditViewState extends State<TodoEditView> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(),
+                  Text('最終更新日:' +
+                      DateFormat('yyyy/MM/dd(E) HH:mm', "ja_JP")
+                          .format(_newTodo!.dueDate!))
                   // IconButton(
                   //     onPressed: () {
                   //       Navigator.pop(context);
@@ -268,6 +274,7 @@ class _TodoEditViewState extends State<TodoEditView> {
 
   void _setTitle(String title) {
     _newTodo!.title = title;
+    _newTodo!.dueDate = DateTime.now();
     widget.todoBloc!.update(_newTodo!);
   }
 

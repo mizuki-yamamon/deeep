@@ -1,8 +1,10 @@
 import 'package:deep/components/gridtile.dart';
 import 'package:deep/components/map_screen.dart';
 import 'package:deep/components/todo_edit/todo_edit_view.dart';
+
 import 'package:deep/models/todo.dart';
 import 'package:deep/repositories/todo_bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +24,7 @@ class TodoListView extends StatefulWidget {
 class _TodoListViewState extends State<TodoListView> {
   String a = 'Todo';
   PackageInfo? _packageInfo;
+  bool _anime = false;
   String formURL =
       'https://docs.google.com/forms/d/e/1FAIpQLScppcLpy3lsW0cT_5vp4tCBWI9xYsRbuooYrGVTIqNcc1LBDg/viewform?usp=sf_link';
 
@@ -31,11 +34,12 @@ class _TodoListViewState extends State<TodoListView> {
     // TODO: implement initState
     super.initState();
     _getPackageInfo();
-    syncDataWithProvider();
+    syncDataWithProvider1();
   }
 
-  Future syncDataWithProvider() async {
+  Future syncDataWithProvider1() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    //チュートリアル
     var result = prefs.getBool('FirstTime3');
     if (result == null) {
       Navigator.push(
@@ -44,8 +48,31 @@ class _TodoListViewState extends State<TodoListView> {
           builder: (_) => TutorialScreen(),
         ),
       );
-
       setState(() {});
+    }
+    //animesion
+    var result2 = prefs.getBool('Anime');
+    if (result2 == null) {
+      prefs.setBool('Anime', true);
+      setState(() {
+        _anime = true;
+      });
+    } else {
+      setState(() {
+        _anime = result2;
+      });
+    }
+  }
+
+  Future setAnime(bool isAnime) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var result2 = prefs.getBool('Anime');
+
+    if (result2 != null) {
+      prefs.setBool('Anime', isAnime);
+      setState(() {
+        _anime = isAnime;
+      });
     }
   }
 
@@ -57,38 +84,69 @@ class _TodoListViewState extends State<TodoListView> {
     showModalBottomSheet<int>(
         context: context,
         builder: (BuildContext context) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                  leading: Icon(Icons.help),
-                  title: Text('How to use it'),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => TutorialScreen(),
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  leading: Icon(Icons.widgets),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('animation'),
+                      Container(
+                        child: CupertinoSwitch(
+                          value: _anime,
+                          onChanged: (bool value) {
+                            setAnime(value);
+                            setState(() {
+                              _anime = value;
+                            });
+                            //Navigator.pop(context);
+                          },
+                        ),
                       ),
-                    ).then((value) => Navigator.pop(context));
-                  }),
-              ListTile(
-                leading: Icon(Icons.support_agent),
-                title: Text('request'),
-                onTap: () async {
-                  if (await canLaunch(formURL)) {
-                    await launch(formURL, forceSafariVC: false);
-                  } else {
-                    print("error");
-                  }
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.info),
-                title: Text('Version: ${_packageInfo!.version}'),
-                onTap: () => Navigator.of(context).pop(3),
-              ),
-            ],
-          );
+                    ],
+                  ),
+                  onTap: () async {
+                    if (await canLaunch(formURL)) {
+                      await launch(formURL, forceSafariVC: false);
+                    } else {
+                      print("error");
+                    }
+                  },
+                ),
+                ListTile(
+                    leading: Icon(Icons.help),
+                    title: Text('How to use it'),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => TutorialScreen(),
+                        ),
+                      ).then((value) => Navigator.pop(context));
+                    }),
+                ListTile(
+                  leading: Icon(Icons.support_agent),
+                  title: Text('request'),
+                  onTap: () async {
+                    if (await canLaunch(formURL)) {
+                      await launch(formURL, forceSafariVC: false);
+                    } else {
+                      print("error");
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.info),
+                  title: Text('Version: ${_packageInfo!.version}'),
+                  onTap: () => Navigator.of(context).pop(3),
+                ),
+              ],
+            );
+          });
         });
   }
 
@@ -198,7 +256,7 @@ class _TodoListViewState extends State<TodoListView> {
                                                 .number! +
                                             1,
                                     tag: 'Todo',
-                                    model: 1, //マンダラをデフォルトに)
+                                    model: 0, //マンダラ:1
                                   );
                                   _bloc.create(createTodo);
                                   // _moveToCreateView(context, _bloc, _todoList);
