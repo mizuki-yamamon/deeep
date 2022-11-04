@@ -1,12 +1,7 @@
-import 'dart:async';
-
-import 'package:deep/components/gridtile.dart';
-import 'package:deep/components/todo_list/mandala_grid.dart';
 import 'package:deep/models/todo.dart';
 import 'package:deep/models/todo_data.dart';
 import 'package:deep/repositories/todo_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix_gesture_detector/matrix_gesture_detector.dart';
 import 'package:provider/provider.dart';
 
 class MapScreen extends StatefulWidget {
@@ -28,7 +23,6 @@ class _MapScreenState extends State<MapScreen> {
   Offset? position;
   String _taptag = 'aaa';
   String _tapid = 'aaa';
-  GlobalKey widgetKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +32,9 @@ class _MapScreenState extends State<MapScreen> {
           builder: (BuildContext context, AsyncSnapshot<List<Todo>> snapshot) {
             if (snapshot.hasData) {
               List<Todo> _allList = snapshot.data!;
-
               List<Todo> _todoList = snapshot.data!
                   .where((element) => element.tag == 'Todo')
                   .toList();
-              // _todoList.where((element) => element.tag == 'Todo').toList();
               _todoList.sort((a, b) => a.number!.compareTo(b.number!));
               return Scaffold(
                 backgroundColor: Colors.grey[100],
@@ -82,7 +74,7 @@ class _MapScreenState extends State<MapScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: _todoList.asMap().keys.toList().map((index) {
-                        return _cells(
+                        return _trees(
                             model, index, _todoList[index], _allList, 0
                             // ),
                             );
@@ -98,7 +90,7 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  Widget _cells(
+  Widget _trees(
     TodoData model,
     int index,
     Todo _todo,
@@ -152,8 +144,6 @@ class _MapScreenState extends State<MapScreen> {
       } else {
         distance.add(length2 - (length3 / 2));
       }
-
-      // print(distance);
     });
 
     print('ここ2！');
@@ -165,51 +155,56 @@ class _MapScreenState extends State<MapScreen> {
         padding: _todo.tag == 'Todo'
             ? const EdgeInsets.all(70.0)
             : const EdgeInsets.all(0.0),
-        // child: Container(
-        //   margin: const EdgeInsets.all(15.0),
-        //   padding: const EdgeInsets.all(3.0),
-        //   decoration: BoxDecoration(
-        //     color: Colors.blue.withOpacity(0.1),
-        //     borderRadius: BorderRadius.all(Radius.circular(50)),
-        //     //border: Border.all(color: Colors.blueAccent)
-        //   ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _card(model, index, _todo, height),
-            _todoList.isNotEmpty
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _todoList.asMap().keys.toList().map((index) {
-                      return _cells(
-                        model,
-                        index,
-                        _todoList[index],
-                        _allTodo,
-                        (length / 2 - distance[index]) * 150,
-                      );
-                    }).toList())
-                : Container()
-          ],
-          // ),
+        child: Draggable(
+          feedback: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _card(model, index, _todo, height),
+              _todoList.isNotEmpty
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _todoList.asMap().keys.toList().map((index) {
+                        return _trees(
+                          model,
+                          index,
+                          _todoList[index],
+                          _allTodo,
+                          (length / 2 - distance[index]) * 150,
+                        );
+                      }).toList())
+                  : Container()
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _card(model, index, _todo, height),
+              _todoList.isNotEmpty
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _todoList.asMap().keys.toList().map((index) {
+                        return _trees(
+                          model,
+                          index,
+                          _todoList[index],
+                          _allTodo,
+                          (length / 2 - distance[index]) * 150,
+                        );
+                      }).toList())
+                  : Container()
+            ],
+            // ),
+          ),
         ));
   }
-
-  // Offset calculateSizeAndPosition() {
-  //   WidgetsBinding.instance!.addPostFrameCallback((_) {
-  //     final RenderBox box =
-  //         keyText.currentContext!.findRenderObject() as RenderBox;
-
-  //     setState(() {
-  //       position = box.localToGlobal(Offset.zero);
-  //     });
-  //   });
-  //   return position!;
-  // }
 
   Widget _card(TodoData model, int index, Todo _todo,
       double height //containerKey,containerRect,
@@ -227,56 +222,38 @@ class _MapScreenState extends State<MapScreen> {
                 painter: LinePainter(
                   height: height,
                 )),
+
         Container(
-          key: widgetKey,
           width: 150,
           height: 150,
-          child: InkWell(
-            onTap: () {
-              model.updateTodo(_todo);
-              model.updatePreTodo(_todo);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MandalaGridScreen(
-                    // todo: todo,
-                    layer: 1, bloc: widget.bloc!,
-                    //問題をtitleかtagsで分けるため
-                  ),
-                ),
-              );
-              model.notify();
-            },
-            onLongPress: () {
-              setState(() {
-                _tapid = _todo.id!;
-                _taptag = _todo.tag! + _todo.id!;
-              });
-            },
-            child: Card(
+          child: Card(
               color: _todo.tag!.contains(_taptag) || _todo.id == _tapid
                   ? Colors.blue
                   : Colors.white,
               child: Center(
-                child: new Padding(
-                  padding: EdgeInsets.all(4.0),
-                  child: new Text(
-                    _todo.title!,
-                    //"ウィジェットの位置 :${_key.currentContext!.findRenderObject() as RenderBox}",
-                    // widgetKey.currentContext!.findRenderObject().toString(),
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color:
-                            _todo.tag!.contains(_taptag) || _todo.id == _tapid
-                                ? Colors.white
-                                : Colors.black),
-                  ),
+                  child: new Padding(
+                padding: EdgeInsets.all(4.0),
+                child: new Text(
+                  _todo.title!,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: _todo.tag!.contains(_taptag) || _todo.id == _tapid
+                          ? Colors.white
+                          : Colors.black),
                 ),
-              ),
-            ),
-          ),
-        ),
+              ))),
+        ) //)
       ],
+    );
+  }
+
+  Widget _cell(TodoData model, int index, Todo _todo, double height) {
+    return Container(
+      width: 150,
+      height: 150,
+      //child:
+
+      //),
     );
   }
 }
@@ -306,12 +283,6 @@ class LinePainter extends CustomPainter {
         size.width / 3, height!, size.width / 2, height! / 2);
     path.quadraticBezierTo((size.width * 2) / 3, 0, size.width, 0);
     canvas.drawPath(path, paint);
-
-    // canvas.drawLine(
-    //   Offset(size.width * 1, 0),
-    //   Offset(0, height!),
-    //   paint,
-    // );
   }
 
   @override

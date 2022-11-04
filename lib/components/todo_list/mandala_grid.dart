@@ -62,10 +62,6 @@ class _MandalaGridScreenState extends State<MandalaGridScreen>
   void initState() {
     // TODO: implement initState
     super.initState();
-    // _createTodo();
-
-    // _createTodo();
-    //  _createTodo();
   }
 
   @override

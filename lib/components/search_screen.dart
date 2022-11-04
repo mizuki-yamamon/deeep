@@ -77,6 +77,14 @@ class _SearchScreenState extends State<SearchScreen> {
                   },
                   controller: editingController,
                   decoration: InputDecoration(
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(25.7),
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(25.7),
+                      ),
                       labelText: "Search",
                       hintText: "Search",
                       prefixIcon: Icon(Icons.search),
